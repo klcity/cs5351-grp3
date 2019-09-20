@@ -1,16 +1,30 @@
 class UML_Object
 {
   constructor() {
-    this._attrs   = [];
-    this._methods = [];
+    this.attrs   = {};
+    this.methods = {};
+    this.assocs  = {};
+    this.parent  = null;
   }
   addAttribute(attr) {
-    this._attrs.push(attr);
+    if (this.attrs[attr.name]) {
+      // TODO: change all error messages into standardised object,
+      //       which provides information for the text parser, and display
+      //       error messages to the users.
+      throw 'Attribute name already declared';
+    }
+    this.attrs[attr.name] = attr;
   }
   addMethod(method) {
-    this._methods.push(method)
+    if (this.methods[method.name]) {
+      throw 'Method already declared';
+    }
+    this.methods[method.name] = method;
   }
   connect(obj, action_name) {
+    this.assocs[obj.name] = action_name;
+  }
+  extends(obj) {
     throw 'NotImplementedException: must be implemented by the subclass';
   }
   draw(g)
@@ -24,11 +38,22 @@ class UML_Class extends UML_Object
 {
   constructor() {
     super();
+    this.interfaces = [];
   }
-  connect() {
-    throw 'NotImplementedException: pending implement';
+  extends(obj) {
+    if (!(obj instanceof UML_Class)) {
+      throw 'Class must extends another class only';
+    }
+    this.parent = obj;
   }
-  draw() {
+  implements(interface) {
+    if (!(interface instanceof UML_Interface)) {
+      throw 'Only interfaces can be implemented';
+    }
+    // TODO: search whether the interface is already implemented
+    this.interfaces.push(interface);
+  }
+  draw(g) {
     throw 'NotImplementedException: pending implement';
   }
 }
@@ -39,10 +64,42 @@ class UML_Interface extends UML_Object
   constructor() {
     super();
   }
-  connect() {
-    throw 'NotImplementedException: pending implement';
+  extends(obj) {
+    if (!(obj instanceof UML_Interface)) {
+      'An interface can only inherits another interface';
+    }
+    this.parent = obj;
   }
-  draw() {
+  draw(g) {
     throw 'NotImplementedException: pending implement';
   }
 }
+
+// -------------------------------------
+class UML_Attribute
+{
+  constructor(modifier, name, type)
+  {
+    this.modifier = modifier;
+    this.name = name;
+    this.type = type;
+  }
+}
+
+// -------------------------------------
+class UML_Method
+{
+  constructor(modifier, name, type)
+  {
+    this.modifier = modifier;
+    this.name = name;
+    this.parameters = [];
+    this.type = type; // return type
+  }
+
+  addParam(type, name)
+  {
+    this.parameters.push({type: type, name: name});
+  }
+}
+
