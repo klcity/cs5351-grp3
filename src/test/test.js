@@ -40,7 +40,7 @@ function draw()
     let rx = o.x - o.w/2;
     let ry = o.y - o.h/2;
 
-    ctx.fillStyle = 'rgba(200,255,220,.1)';
+    ctx.fillStyle = 'rgba(200,255,220,.3)';
     ctx.fillRect(rx, ry, o.w, o.h);
     ctx.rect    (rx, ry, o.w, o.h);
 
@@ -73,13 +73,53 @@ function getRandomSize2() {
 
 function setLocation(arr)
 {
+  const C_PAD = 20;
+
   arr.sort((a, b) => Math.sign(b.l.length - a.l.length));
 
   let d = {};
   for (var i = 0; i < arr.length; i++)
   {
-    let cur = arr[i];
-    proc(cur, d);
+    let parent = arr[i];
+    if (d[parent.n]) { continue; }
+
+    let N = parent.l.length;
+    let H = Math.floor(N/2);
+
+    let tW = (H - 1) * C_PAD, bW = tW;
+    let tH = 0, bH = 0;
+    for (var j = 0; j < H; j++) {
+      let c = parent.l[j];
+      tW += c.w;
+      tH = Math.max(tH, c.h);
+    }
+    tH = -tH/2 - parent.h/2 - C_PAD;
+
+    for (var j = H; j < N; j++) {
+      let c = parent.l[j];
+      bW += c.w;
+      bH = Math.max(bH, c.h);
+    }
+    bH = bH/2 + parent.h/2 + C_PAD;
+
+    //----
+    let curDX = -tW / 2;
+    for (var j = 0; j < H; j++) {
+      var c = parent.l[j];
+      d[c.n] = c;
+      c.x = parent.x + curDX;
+      c.y = parent.y + tH;
+      curDX += c.w + C_PAD; 
+    }
+    curDX = -bW / 2;
+    for (var j = H; j < N; j++) {
+      var c = parent.l[j];
+      d[c.n] = c;
+      c.x = parent.x + curDX;
+      c.y = parent.y + bH;
+      curDX += c.w + C_PAD;
+    }
+
   }
 
   console.log(d);
@@ -107,7 +147,7 @@ cvs.height = 600;
 cvs.style.border = '1px solid blue';
 
 let arr = [];
-for (var i = 0; i < 8; i++)
+for (var i = 0; i < 4; i++)
 {
   let w = 80 + getRandomSize1();
   let h = 50 + getRandomSize2();
@@ -119,11 +159,11 @@ arr[0].l.push(arr[1]);
 arr[0].l.push(arr[2]);
 arr[0].l.push(arr[3]);
 
-arr[1].l.push(arr[4]);
+// arr[1].l.push(arr[4]);
 
-arr[5].l.push(arr[6]);
-arr[5].l.push(arr[7]);
-arr[5].l.push(arr[0]);
+// arr[5].l.push(arr[6]);
+// arr[5].l.push(arr[7]);
+// arr[5].l.push(arr[0]);
 
 setLocation(arr);
 
