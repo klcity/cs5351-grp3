@@ -1,57 +1,22 @@
 
+Array.prototype.min = function(f) { return Math.min.apply(null, f?this.map(f):this); };
+Array.prototype.max = function(f) { return Math.max.apply(null, f?this.map(f):this); };
+Array.prototype.avg = function(f) { return Math.avg.apply(null, f?this.map(f):this); };
 
-function draw()
+class GObj
 {
-  let cvs = document.querySelector('#cvs');
-  let ctx = cvs.getContext('2d');
-
-  ctx.clearRect(0, 0, cvs.width, cvs.height);
-  ctx.strokeStyle = 'red';
-
-  ctx.save();
-  ctx.translate(cvs.width/2, cvs.height/2);
-
-  ctx.beginPath();
-  for (var i = 0; i < arr.length; i++)
-  {
-    let o = arr[i];
-
-    // draw lines
-    for (var j = 0; j < o.l.length; j++)
-    {
-      let t = o.l[j];
-      ctx.moveTo(o.x, o.y);
-      ctx.lineTo(t.x, t.y);
-
-      // arrow
-      let theta = Math.atan2(o.y-t.y, o.x-t.x);
-      ctx.lineTo(
-        t.x + 12 * Math.cos(theta - Math.PI/6),
-        t.y + 12 * Math.sin(theta - Math.PI/6)
-      );
-      ctx.lineTo(
-        t.x + 12 * Math.cos(theta + Math.PI/6),
-        t.y + 12 * Math.sin(theta + Math.PI/6)
-      );
-      ctx.lineTo(t.x, t.y);
-    }
-
-    // draw box
-    let rx = o.x - o.w/2;
-    let ry = o.y - o.h/2;
-
-    ctx.fillStyle = 'rgba(200,255,220,.3)';
-    ctx.fillRect(rx, ry, o.w, o.h);
-    ctx.rect    (rx, ry, o.w, o.h);
-
-    // draw text
-    ctx.fillStyle = 'red';
-    ctx.fillText(o.n, rx, ry);
-
+  constructor(w, h, name) {
+    this.x = 0;
+    this.y = 0;
+    this.w = w;
+    this.h = h;
+    this.name = name;
+    this.parent = null;
   }
-  ctx.stroke();
-  ctx.restore();
+  get X() { return this.x - this.w/2; }
+  get Y() { return this.y - this.h/2; }
 }
+
 
 function getRandomSize1() {
   let x = Math.random() * 200
@@ -73,98 +38,76 @@ function getRandomSize2() {
 
 function setLocation(arr)
 {
-  const C_PAD = 20;
+  // create backward links
+  arr.forEach(x => {
+    if (!x.parent) return;
+    if (!x.parent.children) x.parent.children = [];
+    x.parent.children.push(x);
+  });
 
-  arr.sort((a, b) => Math.sign(b.l.length - a.l.length));
+  // find all roots
+  let roots = arr.filter(x => null == x.parent);
+  console.log(roots);
+  
+  // recursive location assignment
+  assignCoord(roots, new GObj(0,0));
+  
+}
 
-  let d = {};
-  for (var i = 0; i < arr.length; i++)
-  {
-    let parent = arr[i];
-    if (d[parent.n]) { continue; }
-
-    let N = parent.l.length;
-    let H = Math.floor(N/2);
-
-    let tW = (H - 1) * C_PAD, bW = tW;
-    let tH = 0, bH = 0;
-    for (var j = 0; j < H; j++) {
-      let c = parent.l[j];
-      tW += c.w;
-      tH = Math.max(tH, c.h);
-    }
-    tH = -tH/2 - parent.h/2 - C_PAD;
-
-    for (var j = H; j < N; j++) {
-      let c = parent.l[j];
-      bW += c.w;
-      bH = Math.max(bH, c.h);
-    }
-    bH = bH/2 + parent.h/2 + C_PAD;
-
-    //----
-    let curDX = -tW / 2;
-    for (var j = 0; j < H; j++) {
-      var c = parent.l[j];
-      d[c.n] = c;
-      c.x = parent.x + curDX;
-      c.y = parent.y + tH;
-      curDX += c.w + C_PAD; 
-    }
-    curDX = -bW / 2;
-    for (var j = H; j < N; j++) {
-      var c = parent.l[j];
-      d[c.n] = c;
-      c.x = parent.x + curDX;
-      c.y = parent.y + bH;
-      curDX += c.w + C_PAD;
-    }
-
+function assignCoord(items, /*center*/ o)
+{
+  const C_PAD = 50;
+  let totalWidth = items.map(x => x.w).reduce((a,b) => a+b);
+  let curX = o.x + o.w/2;
+  if (items.length > 1) {
+    curX += ( (items.length - 1) * C_PAD + totalWidth) / -2;
   }
 
-  console.log(d);
+  items.forEach(i => {
+    i.x = curX;
+    i.y = o.y + C_PAD + (i.h + o.h)/2;
+    curX += i.w + C_PAD;
+  });
+
+  items.forEach(i => {
+    if (i.children) assignCoord(i.children, i);
+  });
 }
 
-let _r = 200;
-let _t = 0;
-function proc(c, d)
+
+function setLinks(arr)
 {
-  if (d[c.n]) return;
-  d[c.n] = c;
 
-  c.x =  Math.sin(_t) * _r;
-  c.y = -Math.cos(_t) * _r;
-
-  _t += (2 * Math.PI / 8) ;
-
-  console.log(c.n, c);
-  c.l.forEach(x => proc(x, d));
 }
-
-let cvs = document.querySelector('#cvs');
-cvs.width  = 800;
-cvs.height = 600;
-cvs.style.border = '1px solid blue';
 
 let arr = [];
-for (var i = 0; i < 4; i++)
+for (var i = 0; i < 8; i++)
 {
   let w = 80 + getRandomSize1();
   let h = 50 + getRandomSize2();
 
-  arr.push({ x:0, y:0, w:w, h:h, l:[], n:`C${i}`});
+  arr.push(new GObj(w, h, `C${i}`));
 }
 
-arr[0].l.push(arr[1]);
-arr[0].l.push(arr[2]);
-arr[0].l.push(arr[3]);
+arr[1].parent = arr[0];
+arr[2].parent = arr[0];
+arr[3].parent = arr[0];
 
-// arr[1].l.push(arr[4]);
+arr[4].parent = arr[1];
 
-// arr[5].l.push(arr[6]);
-// arr[5].l.push(arr[7]);
-// arr[5].l.push(arr[0]);
+arr[6].parent = arr[5];
+arr[7].parent = arr[5];
+arr[0].parent = arr[5];
+
+// arr[0].x = -200;
+// arr[5].x =  200;
 
 setLocation(arr);
+setLinks(arr);
 
-draw();
+new Vue({
+  el: '#app',
+  data: {
+    rect: arr
+  }
+});
