@@ -103,4 +103,8 @@ class UML_InterfaceParser
   }
 }
 
+function msg() {
+  var val = $("#txt-syntax").val();
+    return val;
+}
 
