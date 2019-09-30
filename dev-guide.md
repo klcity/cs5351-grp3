@@ -88,10 +88,10 @@ Draft Custom Syntax Design
 title Graph Title
 
 class A
-+ attr1 int
-# attr2 string
-- attr3 double
-~ attr4 B
++ attr1 : int
+# attr2 : string
+- attr3 : double
+~ attr4 : B
 + method1():void
 # method2(a:int, b:byte[]):int
 
