@@ -81,6 +81,10 @@ Work breakdown Structure
     1. `[#TY-02]` Setup Apache server
     1. `[#TY-03]` Deploy application
 
+1. Road-map
+    . `[#RM-01]` Print function by click function
+    . `[#RM-02]` Email image by click function
+
 
 Draft Custom Syntax Design
 ==================================================
@@ -91,7 +95,9 @@ class A
 + attr1 : int
 # attr2 : string
 - attr3 : double
-~ attr4 : B
+~ attr4 : Boolean
+$ attr5 : Date
+@ attr6 : Time
 + method1():void
 # method2(a:int, b:byte[]):int
 
