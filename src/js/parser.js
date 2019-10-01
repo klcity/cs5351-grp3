@@ -104,6 +104,6 @@ class UML_InterfaceParser
 }
 
 function myFunction() {
-  var x = document.getElementById("#txt-syntax");
-  alert(x);
+  var x = document.getElementById("txt-syntax");
+  alert(x.value);
 }
