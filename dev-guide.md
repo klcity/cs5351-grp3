@@ -110,7 +110,7 @@ Class A, has 4 attributes, which are:
 - public integer attr1
 - protected string attr2
 - private double attr3
-- internal B attr4
+- internal Boolean attr4
 and 2 methods:
 - public function method1 with no paramters, returns nothing 
 - protected function method2 with 2 paramters: 1 int, 1 byte[]; returns an integer
