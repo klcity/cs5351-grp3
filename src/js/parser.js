@@ -121,14 +121,29 @@ class UML_ClassParser
 			}
 		}else{
 			// parse line
-			let vis = getVisibility(line);
-			console.log("vis: " + vis);
-			let bmethod = isMethod(line);
-			console.log("ismethod: " + bmethod);
-			//let method = getMethodOrAttrName(line);
-			//console.log(method);
-			
-			
+			if (validateLine(line)){
+				
+				let vis = getVisibility(line);
+				console.log("vis: " + vis);
+
+				let attr_method = getMethodOrAttr(line);
+				console.log(attr_method);
+				
+				let bmethod = isMethod(attr_method[0]);
+				console.log("ismethod: " + bmethod);
+				
+				if (bmethod){
+					obj.addMethod(createUMLMethod(vis[0], attr_method));
+				}else{
+					obj.addAttribute(createUMLAttribute(vis[0], attr_method));
+				}
+				
+				console.log(obj);
+				
+			}else{
+				// Error Handling
+				// TODO:
+			}			
 		}
 	}
 	return obj;
@@ -152,6 +167,37 @@ class UML_InterfaceParser
   }
 }
 
+function createUMLMethod(vis, strArr){
+	
+	let param;
+	let arrParam = getMethodParam(strArr[0]);
+
+	let objMethod = new UML_Method(vis, strArr[0].substring(0,strArr[0].indexOf('(')), strArr[1]);
+	
+	for (i=0; i<arrParam.length; i++){
+		param = arrParam[i].trim().split(' ');
+		objMethod.addParam(param[0], param[1]);
+	}
+	
+	return objMethod;
+	
+}
+
+function createUMLAttribute(vis, strArr){
+	
+	let objAttribute = new UML_Attribute(vis, strArr[0], strArr[1]);
+	
+	return objAttribute;
+	
+}
+
+
+function validateLine(str){
+	// Pending implementation
+	// TODO:
+	return true;
+}
+
 function getVisibility(str){
 	
 	let visrx = /[\+\-\@\#]/;
@@ -168,8 +214,20 @@ function getVisibility(str){
 	}
 }
 
-function getMethodOrAttrName(str){
-
+function getMethodOrAttr(str){
+	
+	// attribute / method name and type (separated by ':') 
+	let attr_method_name = str.substring(1,str.length).trim();
+	
+	let strs;
+	if (attr_method_name.length > 0){
+		strs = attr_method_name.split(':');
+	}
+	for(i=0; i<strs.length; i++){
+		console.log(strs[i]);
+	}
+	
+	return strs;
 }
 
 function isMethod(str){
@@ -189,6 +247,24 @@ function isMethod(str){
 	return bmethod;
 }
 
+function getMethodParam(str){
+	
+	let strParam;
+	let params;
+	let methodrx = /\([^)]+\)/;
+	let omethod;
+	
+	if (str.length > 0){
+		omethod = str.trim().match(methodrx);
+	}
+	if (omethod){
+		strParam = omethod[0].substring(1,omethod[0].length-1);
+	}
+	
+	params = strParam.trim().split(',');
+	
+	return params;
+}
 
 function myFunction() {
   var x = document.getElementById("txt-syntax");
