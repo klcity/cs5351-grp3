@@ -1,6 +1,8 @@
 class UML_Object
 {
   constructor() {
+	
+	this.name = "";
     this.attrs   = {};
     this.methods = {};
     this.assocs  = {};
@@ -46,12 +48,12 @@ class UML_Class extends UML_Object
     }
     this.parent = obj;
   }
-  implements(interface) {
-    if (!(interface instanceof UML_Interface)) {
+  implements(obj) {
+    if (!(obj instanceof UML_Interface)) {
       throw 'Only interfaces can be implemented';
     }
     // TODO: search whether the interface is already implemented
-    this.interfaces.push(interface);
+    this.interfaces.push(obj);
   }
   draw(g) {
     throw 'NotImplementedException: pending implement';
@@ -102,4 +104,3 @@ class UML_Method
     this.parameters.push({type: type, name: name});
   }
 }
-
