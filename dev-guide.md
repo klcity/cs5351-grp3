@@ -91,22 +91,20 @@ Draft Custom Syntax Design
 <pre>
 title Graph Title
 
-class A
+class A >> Class SU-A || interface IF1 || interface IF2
 + attr1 : int
 # attr2 : string
 - attr3 : double
 ~ attr4 : Boolean
-$ attr5 : Date
-@ attr6 : Time
 + method1():void
 # method2(a:int, b:byte[]):int
 
-interface B
+interface B >> interface C
 + method1():string
 + method2(str:string...):double
 </pre>
 
-Class A, has 4 attributes, which are:
+Class A, which extends Class SU-A implements Interface IF1 and IF2, has 4 attributes, which are:
 - public integer attr1
 - protected string attr2
 - private double attr3
@@ -115,7 +113,7 @@ and 2 methods:
 - public function method1 with no paramters, returns nothing 
 - protected function method2 with 2 paramters: 1 int, 1 byte[]; returns an integer
 
-Interface B, has 2 methods
+Interface B, which extends Interface C, has 2 methods
 - method1 with no parameters, returns a string
 - method2 with paramter array of strings, returns a double
 
