@@ -246,7 +246,7 @@ function validateInterfaceLine(str){
 
 function getVisibility(str){
 	
-	let visrx = /[\+\-\@\#]/;
+	let visrx = /[\+\-\~\#]/;
 	let ovis;
 	
 	if (str.length > 0){

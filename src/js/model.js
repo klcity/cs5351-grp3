@@ -2,7 +2,7 @@ class UML_Object
 {
   constructor() {
 	
-	  this.name = "";
+    this.name = "";
     this.attrs   = {};
     this.methods = {};
     this.assocs  = {};
