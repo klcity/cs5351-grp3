@@ -25,10 +25,10 @@ class Parser
 
 		parseline = line.toLowerCase();
 		
-		if (parseline.includes("class:")){
+		if (parseline.includes("class ")){
 			parsebool = true;
 			parsetype = "class";
-		}else if (parseline.includes("interface:")){
+		}else if (parseline.includes("interface ")){
 			parsebool = false;
 			parsetype = "interface";
 		}else{
@@ -66,7 +66,8 @@ class Parser
     {
       // TODO: show exception message thrown by the parsers
     }
-
+	console.log(arr);
+	
     return arr;
   }
 }
@@ -104,33 +105,33 @@ class UML_ClassParser
 	console.log( "UML_ClassParser.read()");
     // read and create Class Object
 	let obj = new UML_Class();
-	reader.position = 0;
+	reader.position--;
 	
 	let headerline = true;
 	
 	let text
     let line;
     while (line = reader.read()){
-		console.log("headerline: " + headerline);
+		//console.log("headerline: " + headerline);
 		if (headerline){ 
-			let strpart = line.split(":");
+			let strpart = line.split(" ");
 			if (strpart.length > 1){ // set class name			
 				obj.name = strpart[1].trim();
-				console.log("obj.name: " + obj.name); 
+				//console.log("obj.name: " + obj.name); 
 				headerline = false;
 			}
 		}else{
 			// parse line
-			if (validateLine(line)){
+			if (validateClassLine(line)){
 				
 				let vis = getVisibility(line);
-				console.log("vis: " + vis);
+				//console.log("vis: " + vis);
 
 				let attr_method = getMethodOrAttr(line);
-				console.log(attr_method);
+				//console.log(attr_method);
 				
 				let bmethod = isMethod(attr_method[0]);
-				console.log("ismethod: " + bmethod);
+				//console.log("ismethod: " + bmethod);
 				
 				if (bmethod){
 					obj.addMethod(createUMLMethod(vis[0], attr_method));
@@ -160,10 +161,46 @@ class UML_InterfaceParser
   read(reader)
   {
 	console.log( "UML_InterfaceParser.read()");
-    // TODO: read and create Interface Object
-    //throw `Error found on line ${lineNumber}`;
+    // read and create Class Object
+	let obj = new UML_Interface();
+	reader.position--;
+	
+	let headerline = true;
+	
+	let text
+    let line;
+    while (line = reader.read()){
+		//console.log("headerline: " + headerline);
+		if (headerline){ 
+			let strpart = line.split(" ");
+			if (strpart.length > 1){ // set interface name			
+				obj.name = strpart[1].trim();
+				//console.log("obj.name: " + obj.name); 
+				headerline = false;
+			}
+		}else{
+			// parse line
+			if (validateInterfaceLine(line)){
+				
+				// must be '+'
+				let vis = '+';
+				//console.log("vis: " + vis);
 
-    // only accept methods
+				let attr_method = getMethodOrAttr(line);
+				//console.log(attr_method);
+				
+				obj.addMethod(createUMLMethod(vis, attr_method));
+				
+				console.log(obj);
+				
+			}else{
+				// Error Handling
+				// TODO:
+			}			
+		}
+	}
+	return obj;
+    
   }
 }
 
@@ -172,11 +209,11 @@ function createUMLMethod(vis, strArr){
 	let param;
 	let arrParam = getMethodParam(strArr[0]);
 
-	let objMethod = new UML_Method(vis, strArr[0].substring(0,strArr[0].indexOf('(')), strArr[1]);
+	let objMethod = new UML_Method(vis, strArr[0].substring(0,strArr[0].indexOf('(')).trim(), strArr[1].trim());
 	
 	for (i=0; i<arrParam.length; i++){
 		param = arrParam[i].trim().split(' ');
-		objMethod.addParam(param[0], param[1]);
+		objMethod.addParam(param[0].trim(), param[1].trim());
 	}
 	
 	return objMethod;
@@ -185,16 +222,25 @@ function createUMLMethod(vis, strArr){
 
 function createUMLAttribute(vis, strArr){
 	
-	let objAttribute = new UML_Attribute(vis, strArr[0], strArr[1]);
+	let objAttribute = new UML_Attribute(vis, strArr[0].trim(), strArr[1].trim());
 	
 	return objAttribute;
 	
 }
 
 
-function validateLine(str){
+function validateClassLine(str){
 	// Pending implementation
 	// TODO:
+	return true;
+}
+
+
+function validateInterfaceLine(str){
+	// Pending implementation
+	// TODO:
+	// only accept methods
+	// must be public : modifier must be '+'
 	return true;
 }
 
@@ -223,9 +269,9 @@ function getMethodOrAttr(str){
 	if (attr_method_name.length > 0){
 		strs = attr_method_name.split(':');
 	}
-	for(i=0; i<strs.length; i++){
-		console.log(strs[i]);
-	}
+//	for(i=0; i<strs.length; i++){
+//		console.log(strs[i]);
+//	}
 	
 	return strs;
 }
@@ -234,7 +280,7 @@ function isMethod(str){
 	
 	let bmethod = false;
 	
-	let methodrx = /\([^)]+\)/;
+	let methodrx = /\([^)]*\)/;
 	let omethod;
 	
 	if (str.length > 0){
@@ -251,7 +297,7 @@ function getMethodParam(str){
 	
 	let strParam;
 	let params;
-	let methodrx = /\([^)]+\)/;
+	let methodrx = /\([^)]*\)/;
 	let omethod;
 	
 	if (str.length > 0){
@@ -260,8 +306,10 @@ function getMethodParam(str){
 	if (omethod){
 		strParam = omethod[0].substring(1,omethod[0].length-1);
 	}
-	
-	params = strParam.trim().split(',');
+	if (strParam.trim().length > 0)
+		params = strParam.trim().split(',');
+	else
+		params = [];
 	
 	return params;
 }
