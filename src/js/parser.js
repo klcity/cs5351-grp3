@@ -63,6 +63,7 @@ class Parser
     catch (ex)
     {
       // TODO: show exception message thrown by the parsers
+	  console.log(ex.message);
     }
 	console.log("arr size: " + arr.length);
 	console.log(arr);
