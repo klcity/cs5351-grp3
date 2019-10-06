@@ -82,8 +82,8 @@ Work breakdown Structure
     1. `[#TY-03]` Deploy application
 
 1. Road-map
-    . `[#RM-01]` Print function by click function
-    . `[#RM-02]` Email image by click function
+    1. `[#RM-01]` Print function by click function
+    1. `[#RM-02]` Email image by click function
 
 
 Draft Custom Syntax Design
