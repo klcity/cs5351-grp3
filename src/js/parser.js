@@ -456,3 +456,8 @@ function myFunction() {
   var x = document.getElementById("txt-syntax");
   document.getElementById("sec-output").innerHTML = x.value;
 }
+
+function clearFunction() {
+	document.getElementById("txt-syntax").value = "";
+	document.getElementById("sec-output").innerHTML = "";
+}
