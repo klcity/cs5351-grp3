@@ -61,11 +61,7 @@ function assignCoord(items, /*center*/ o)
 {
   let totalWidth = items.map(x => estimateWidth(x)).reduce((a,b) => a+b);
   let curX = o.x + o.w/2;
-  if (items.length > 1) {
-    curX += ( (items.length - 1) * C.PAD + totalWidth) / -2;
-  } else {
-    curX -= totalWidth/2;
-  }
+  curX += ( (items.length - 1) * C.PAD + totalWidth) / -2;
 
   items.forEach(i => {
     i.x = curX + (estimateWidth(i)-o.w)/2;
