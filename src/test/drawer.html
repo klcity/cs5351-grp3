@@ -1,5 +1,5 @@
 <div>
-  <svg viewBox="-500 0 1000 1000">
+  <svg viewBox="-50 -100 1000 1200">
     <defs>
       <style>
         .cls-box {
@@ -10,21 +10,31 @@
           stroke: red;
           stroke-width: 1;
         }
+
+        .dg { stroke: blue; }
+        .cls-box:hover ~ .dg2 { stroke: blue; }
       </style>
     </defs>
-    <circle x="0" y="0" r="1"  fill="rgba(255,0,0,.5)"></circle>
-    <circle x="0" y="0" r="10" fill="rgba(255,0,0,.5)"></circle>
-    <circle x="0" y="0" r="50" fill="rgba(255,0,0,.5)"></circle>
     <g id="app">
 
       <g v-for="r in rect">
-        <rect class="cls-box" :x="r.X" :y="r.Y" :width="r.w" :height="r.h" stroke="black">
-          <text>{{ r.name }}</text>
-        </rect>
-        <!--
-          <line class="assc" v-if="r.parent" :x1="r.x" :y1="r.y" :x2="r.parent.x" :y2="r.parent.y"></line>
-        -->
-        <line class="assc" v-if="r.parent" :x1="r.x" :y1="r.Y" :x2="r.parent.x" :y2="r.parent.Y + r.parent.h"></line>
+        <text :x="r.X" :y="r.Y">{{ r.name }} - {{ r.ew }}</text>
+        <rect class="cls-box" stroke="black"
+              :x="r.X" :y="r.Y"
+              :width="r.w" :height="r.h"></rect>
+        <line v-if="r.parent" class="assc"
+              :x1="r.x" :y1="r.Y"
+              :x2="r.parent.x" :y2="r.parent.Y + r.parent.h"></line>
+
+        <line class="dg"
+              :x1="r.x - r.ew/2" :y1="r.y"
+              :x2="r.x + r.ew/2" :y2="r.y"></line>
+        <line class="dg2"
+              :x1="r.x - r.ew/2" :y1="0"
+              :x2="r.x - r.ew/2" :y2="1000"></line>
+        <line class="dg2"
+              :x1="r.x + r.ew/2" :y1="0"
+              :x2="r.x + r.ew/2" :y2="1000"></line>
       </g>
 
     </g>

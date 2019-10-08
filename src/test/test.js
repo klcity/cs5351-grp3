@@ -1,3 +1,6 @@
+let C = {
+  PAD: 50,
+};
 
 Array.prototype.min = function(f) { return Math.min.apply(null, f?this.map(f):this); };
 Array.prototype.max = function(f) { return Math.max.apply(null, f?this.map(f):this); };
@@ -56,24 +59,39 @@ function setLocation(arr)
 
 function assignCoord(items, /*center*/ o)
 {
-  const C_PAD = 50;
-  let totalWidth = items.map(x => x.w).reduce((a,b) => a+b);
+  let totalWidth = items.map(x => estimateWidth(x)).reduce((a,b) => a+b);
   let curX = o.x + o.w/2;
   if (items.length > 1) {
-    curX += ( (items.length - 1) * C_PAD + totalWidth) / -2;
+    curX += ( (items.length - 1) * C.PAD + totalWidth) / -2;
+  } else {
+    curX -= totalWidth/2;
   }
 
   items.forEach(i => {
-    i.x = curX;
-    i.y = o.y + C_PAD + (i.h + o.h)/2;
-    curX += i.w + C_PAD;
+    i.x = curX + (estimateWidth(i)-o.w)/2;
+    i.y = o.y + C.PAD + (i.h + o.h)/2;
+    curX += estimateWidth(i) + C.PAD;
   });
 
   items.forEach(i => {
     if (i.children) assignCoord(i.children, i);
   });
 }
-
+function estimateWidth(o) {
+  if (o.ew) return o.ew;
+  if (!o.children) return o.ew = o.w;
+  else switch (o.children.length)
+  {
+    case 0:
+      return o.ew = o.w;
+    case 1:
+      return o.ew = Math.max(o.w, o.children[0].w);
+    default:
+      return o.ew = o.children.reduce((r, x) => 
+          r + estimateWidth(x) + C.PAD
+        , -C.PAD);
+  }
+}
 
 function setLinks(arr)
 {
@@ -81,7 +99,7 @@ function setLinks(arr)
 }
 
 let arr = [];
-for (var i = 0; i < 8; i++)
+for (var i = 0; i < 10; i++)
 {
   let w = 80 + getRandomSize1();
   let h = 50 + getRandomSize2();
@@ -95,9 +113,13 @@ arr[3].parent = arr[0];
 
 arr[4].parent = arr[1];
 
+arr[5].parent = arr[1];
 arr[6].parent = arr[5];
 arr[7].parent = arr[5];
-arr[0].parent = arr[5];
+
+arr[8].parent = arr[2];
+arr[9].parent = arr[3];
+
 
 // arr[0].x = -200;
 // arr[5].x =  200;
