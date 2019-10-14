@@ -1,5 +1,13 @@
-<div>
-  <svg viewBox="-450 -100 1000 1200">
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+        <div>
+  <svg viewBox="-1200 -100 2500 1500">
+  <!-- <svg viewBox="-450 -100 1000 1200"> -->
     <defs>
       <style>
         .cls-box {
@@ -10,7 +18,6 @@
           stroke: red;
           stroke-width: 1;
         }
-
         .dg { stroke: blue; }
         .cls-box:hover ~ .dg2 { stroke: blue; }
       </style>
@@ -22,19 +29,26 @@
         <rect class="cls-box" stroke="black"
               :x="r.X" :y="r.Y"
               :width="r.w" :height="r.h"></rect>
+        <text class="cls-name"
+              :x="r.X + 10" :y="r.Y + 20">{{ r.name }}</text>
+        <line class="cls-line" stroke="black"
+              :x1="r.X" :y1="r.Y + 30"
+              :x2="r.X + r.w" :y2="r.Y + 30"/>
+        <text v-for="(detail, index) in r.attrs"
+              :x="r.X + 10" :y="r.Y + 30 + (index + 1) * 20">
+              {{r.attrs[index].modifier + " " + r.attrs[index].name + ": " + r.attrs[index].type}}</text>
+        <line class="cls-line" stroke="black"
+              :x1="r.X" :y1="r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30"
+              :x2="r.X + r.w" :y2="r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30" />
+        <text v-for="(detail, index) in r.methods"
+              :x="r.X + 10" :y="(r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30) + (index + 1) * 20">
+              {{r.methods[index].modifier + " " + r.methods[index].name + "(" + r.methods[index].parameters + "): " + r.methods[index].type}}</text>
+
+
         <line v-if="r.parent" class="assc"
               :x1="r.x" :y1="r.Y"
               :x2="r.parent.x" :y2="r.parent.Y + r.parent.h"></line>
 
-        <line class="dg"
-              :x1="r.x - r.ew/2" :y1="r.y"
-              :x2="r.x + r.ew/2" :y2="r.y"></line>
-        <line class="dg2"
-              :x1="r.x - r.ew/2" :y1="0"
-              :x2="r.x - r.ew/2" :y2="1000"></line>
-        <line class="dg2"
-              :x1="r.x + r.ew/2" :y1="0"
-              :x2="r.x + r.ew/2" :y2="1000"></line>
       </g>
 
     </g>
@@ -43,3 +57,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="test.js"></script>
+
+    </body>
+</html>
