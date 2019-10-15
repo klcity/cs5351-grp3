@@ -8,9 +8,10 @@ class App
     this.cvs_graphics = document.createElement('canvas');
     this.txt_input = document.querySelector(elm_input);
     this.txt_input.addEventListener('keyup', () => {
-
-      let model = this.parser.parse(this.txt_input.value);
-      this.drawer.draw(this.cvs_graphics, model);
+      
+	  this.parser = new Parser();
+	  let model = this.parser.parse(this.txt_input.value);
+      //this.drawer.draw(this.cvs_graphics, model);
 
     });
 
