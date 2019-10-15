@@ -1,4 +1,14 @@
-/* CSS Layout */
-/* Try commit */  
+/* SVG Layout */
+.cls-box {
+  stroke: 1px solid block;
+  fill: rgba(200,255,255,.7);
+}
+.assc {
+  stroke: red;
+  stroke-width: 1;
+}
 
-// 111
+/* CSS Layout */
+.err-msg {
+  color: red;
+}

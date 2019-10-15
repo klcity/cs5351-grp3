@@ -24,7 +24,7 @@
     </defs>
     <g id="app">
 
-      <g v-for="r in rect">
+      <g v-for="r in graph">
         <text :x="r.X" :y="r.Y">{{ r.name }} - {{ r.ew }}</text>
         <rect class="cls-box" stroke="black"
               :x="r.X" :y="r.Y"

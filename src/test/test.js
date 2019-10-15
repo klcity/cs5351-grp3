@@ -132,65 +132,65 @@ arr[9].parent = arr[Math.round(Math.random())*8];
 
 // Input random text to attributes and methods
 arr.forEach(x => {
-    var age = { modifier: "+", name: "age", type: "int"};
-    x.attrs.push(age);
-    if (Math.round(Math.random()) == 0) {
-        var gender = { modifier: "~", name: "gender", type: "string"};
-        x.attrs.push(gender);
-    }
-    if (Math.round(Math.random()) == 1) {
-        var name = { modifier: "+", name: "name", type: "string"};
-        x.attrs.push(name);
-    }
-    if (Math.round(Math.random()) == 0) {
-        var gender = { modifier: "~", name: "height", type: "int"};
-        x.attrs.push(gender);
-    }
-    if (Math.round(Math.random()) == 1) {
-        var name = { modifier: "+", name: "weight", type: "int"};
-        x.attrs.push(name);
-    }
-    var cookFood = { modifier: "#", name: "cookFood", parameters: "int no_of_dishes", type: "int"};
-    x.methods.push(cookFood);
-    if (Math.round(Math.random()) == 0) {
-        var eatBreakfast = { modifier: "+", name: "eatBreakfast", parameters: "bool cook, string meat bool with_egg", type: "void"};
-        x.methods.push(eatBreakfast);
-    }
-    if (Math.round(Math.random()) == 1) {
-        var takeShower = { modifier: "-", name: "takeShower", parameters: "", type: "date"};
-        x.methods.push(takeShower);
-    }
-    if (Math.round(Math.random()) == 0) {
-        var eatBreakfast = { modifier: "+", name: "eatLunch", parameters: "bool cook, string meat", type: "string"};
-        x.methods.push(eatBreakfast);
-    }
-    if (Math.round(Math.random()) == 1) {
-        var takeShower = { modifier: "-", name: "doHomework", parameters: "", type: "string"};
-        x.methods.push(takeShower);
-    }
+  var age = { modifier: "+", name: "age", type: "int"};
+  x.attrs.push(age);
+  if (Math.round(Math.random()) == 0) {
+    var gender = { modifier: "~", name: "gender", type: "string"};
+    x.attrs.push(gender);
+  }
+  if (Math.round(Math.random()) == 1) {
+    var name = { modifier: "+", name: "name", type: "string"};
+    x.attrs.push(name);
+  }
+  if (Math.round(Math.random()) == 0) {
+    var gender = { modifier: "~", name: "height", type: "int"};
+    x.attrs.push(gender);
+  }
+  if (Math.round(Math.random()) == 1) {
+    var name = { modifier: "+", name: "weight", type: "int"};
+    x.attrs.push(name);
+  }
+  var cookFood = { modifier: "#", name: "cookFood", parameters: "int no_of_dishes", type: "int"};
+  x.methods.push(cookFood);
+  if (Math.round(Math.random()) == 0) {
+    var eatBreakfast = { modifier: "+", name: "eatBreakfast", parameters: "bool cook, string meat bool with_egg", type: "void"};
+    x.methods.push(eatBreakfast);
+  }
+  if (Math.round(Math.random()) == 1) {
+    var takeShower = { modifier: "-", name: "takeShower", parameters: "", type: "date"};
+    x.methods.push(takeShower);
+  }
+  if (Math.round(Math.random()) == 0) {
+    var eatBreakfast = { modifier: "+", name: "eatLunch", parameters: "bool cook, string meat", type: "string"};
+    x.methods.push(eatBreakfast);
+  }
+  if (Math.round(Math.random()) == 1) {
+    var takeShower = { modifier: "-", name: "doHomework", parameters: "", type: "string"};
+    x.methods.push(takeShower);
+  }
 });
 
 arr.forEach(x => {
-    // Set box height
-    x.h = 30 + (x.attrs.length + (x.attrs.length - 1)) * 10 + 20 + (x.methods.length + (x.methods.length - 1)) * 10 + 20;
+  // Set box height
+  x.h = 30 + (x.attrs.length + (x.attrs.length - 1)) * 10 + 20 + (x.methods.length + (x.methods.length - 1)) * 10 + 20;
 
-    // Set box width
-    var fullList = [];
-    for (var i = 0; i < x.attrs.length; i++){
-        fullList.push(x.attrs[i].modifier + " " + x.attrs[i].name + ": " + x.attrs[i].type);
+  // Set box width
+  var fullList = [];
+  for (var i = 0; i < x.attrs.length; i++){
+    fullList.push(x.attrs[i].modifier + " " + x.attrs[i].name + ": " + x.attrs[i].type);
+  }
+  for (var i = 0; i < x.methods.length; i++){
+    fullList.push(x.methods[i].modifier + " " + x.methods[i].name + "(" + x.methods[i].parameters + "): " + x.methods[i].type);
+  }
+  fullList.push(x.name);
+  console.log(fullList);
+  var maxWordLength = 0;
+  for (var i = 0; i < fullList.length; i++) {
+    if (fullList[i].length > maxWordLength) {
+      maxWordLength = fullList[i].length;
     }
-    for (var i = 0; i < x.methods.length; i++){
-        fullList.push(x.methods[i].modifier + " " + x.methods[i].name + "(" + x.methods[i].parameters + "): " + x.methods[i].type);
-    }
-    fullList.push(x.name);
-    console.log(fullList);
-    var maxWordLength = 0;
-    for (var i = 0; i < fullList.length; i++) {
-        if (fullList[i].length > maxWordLength) {
-            maxWordLength = fullList[i].length;
-        }
-    }
-    x.w = maxWordLength * 7.5;
+  }
+  x.w = maxWordLength * 7.5;
 });
 
 

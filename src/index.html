@@ -6,6 +6,7 @@
           integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
           crossorigin="anonymous">
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <script src="js/model.js"></script>
   <script src="js/parser.js"></script>
   <script src="js/app.js" defer></script>
@@ -13,20 +14,58 @@
   <title>Draw Class Diagram</title>
 </head>
 <body>
-  <button onclick="myFunction()">Draw Diagram</button>
-  <button onclick="clearFunction()">Clear All</button>
-  <table>
-    <tr>
-    <td>
+  <form onsubmit="return false" id="app">
+
+    <button type="reset">Clear All</button>
+  
     <section id="sec-input">
-    <textarea rows="10" cols="50" id="txt-syntax"></textarea>
+      <textarea rows="10" cols="50"
+                v-model="codestr"
+                @input="input()" :placeholder="placeholder"></textarea>
     </section>
-    </td>
-    <td>
+
     <section id="sec-output">
+      <span v-if="graph.length">
+        No Graph
+      </span>
+      <svg v-else
+           viewBox="-1200 -100 2500 1500">
+        <g>
+    
+          <g v-for="r in graph">
+            <text :x="r.X" :y="r.Y">{{ r.name }} - {{ r.ew }}</text>
+            <rect class="cls-box" stroke="black"
+                  :x="r.X" :y="r.Y"
+                  :width="r.w" :height="r.h"></rect>
+            <text class="cls-name"
+                  :x="r.X + 10" :y="r.Y + 20">{{ r.name }}</text>
+            <line class="cls-line" stroke="black"
+                  :x1="r.X" :y1="r.Y + 30"
+                  :x2="r.X + r.w" :y2="r.Y + 30"/>
+            <text v-for="(detail, index) in r.attrs"
+                  :x="r.X + 10" :y="r.Y + 30 + (index + 1) * 20">
+                  {{r.attrs[index].modifier + " " + r.attrs[index].name + ": " + r.attrs[index].type}}</text>
+            <line class="cls-line" stroke="black"
+                  :x1="r.X" :y1="r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30"
+                  :x2="r.X + r.w" :y2="r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30" />
+            <text v-for="(detail, index) in r.methods"
+                  :x="r.X + 10" :y="(r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30) + (index + 1) * 20">
+                  {{r.methods[index].modifier + " " + r.methods[index].name + "(" + r.methods[index].parameters + "): " + r.methods[index].type}}</text>
+    
+    
+            <line v-if="r.parent" class="assc"
+                  :x1="r.x" :y1="r.Y"
+                  :x2="r.parent.x" :y2="r.parent.Y + r.parent.h"></line>
+    
+          </g>
+    
+        </g>
+      </svg>
+
     </section>
-    <td>
-  </tr>
-  </table>
+
+    <span class="err-msg">{{ errMsg }}</span>
+
+  </form>
 </body>
 </html>
