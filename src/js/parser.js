@@ -316,6 +316,21 @@ function validateInterfaceAssociationLine(str){
 		(1) can only have one >>
 		(2) must be separated by a name in between
 	*/
+	let x = 0;
+	for(j=0; j<str.length; j++) {
+		if(str[j].match(">") {
+			x++;
+		}
+	}
+
+	if(x<=1 || x>=3)
+		return fales;
+
+	for(i=0; i<str.length-1; i++) {
+		if (str[i].match(">") && str[i++].match(">"))
+			return true;
+	}
+		return false;
 }
 
 function validateClassLine(str){
