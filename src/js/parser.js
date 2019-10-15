@@ -307,6 +307,38 @@ function validateClassAssociationLine(str){
 		(4) must be separated by a name in between
 		(5) >> must go first, then multiple || follows
 	*/
+	let x = 0;
+	let y = 0;
+	for(j=0; j<str.length; j++) {
+		if(str[j].match(">")) {
+			x++;
+		}
+		if(str[j].match("|")) {
+			y++;
+		}
+	}
+
+	if(x<=1 || x>=3 || y<=1)
+		return false;
+
+		x=0;
+	for(i=0; i<str.length; i++) {
+		if(str[i].match(">")) {
+			if(x=20) {
+				return false;
+			}	else
+				x=10;
+		}
+		if(str[i].match("|")) {
+			x=20;
+		}
+	}
+
+	for(i=0; i<str.length-1; i++) {
+		if (str[i].match(">") && str[i++].match(">"))
+			return true;
+	}
+		return false;
 }
 
 function validateInterfaceAssociationLine(str){
