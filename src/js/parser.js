@@ -309,6 +309,8 @@ function validateClassAssociationLine(str){
 	*/
 	let x = 0;
 	let y = 0;
+
+	// meet (1) requirements
 	for(j=0; j<str.length; j++) {
 		if(str[j].match(">")) {
 			x++;
@@ -317,28 +319,17 @@ function validateClassAssociationLine(str){
 			y++;
 		}
 	}
-
-	if(x<=1 || x>=3 || y<=1)
+	let z = y%2;
+	if(x<=1 || x>=3 || y<=1 || z!=0)
 		return false;
 
-		x=0;
-	for(i=0; i<str.length; i++) {
-		if(str[i].match(">")) {
-			if(x=20) {
-				return false;
-			}	else
-				x=10;
-		}
-		if(str[i].match("|")) {
-			x=20;
-		}
-	}
+	var regex_1 = /[>]{2}/; // define only can have one >> characters under string
 
-	for(i=0; i<str.length-1; i++) {
-		if (str[i].match(">") && str[i++].match(">"))
-			return true;
-	}
-		return false;
+	if(str[0].match(">") || str[str.length-1].match(">"))
+			return false;
+	if(!(str.match(regex_1)))
+			return false;
+
 }
 
 function validateInterfaceAssociationLine(str){
