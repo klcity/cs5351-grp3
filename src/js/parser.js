@@ -99,6 +99,9 @@ class LineReader
 
     return line.trim();
   }
+  back(){
+	  this.position--;
+  }
 }
 
 // -------------------------------------
@@ -110,7 +113,7 @@ class UML_ClassParser
 
     // read and create Class Object
 	let obj = new UML_Class();
-	reader.position--;
+	reader.back();
 	
 	let headerline = true;
 	
@@ -120,69 +123,70 @@ class UML_ClassParser
     while (line = reader.read()){
 
 		if (headerline){ 
-			let associationIdx = splitAssociationString(line);
-			
-			if (associationIdx > 0){
-				classDef = line.substring(0, associationIdx).trim();
-				assoDef = line.substring(associationIdx, line.length).trim();
-			}else{
-				classDef = line.trim();
-				assoDef = "";
-			}
-			
-			let strpart = classDef.split(" ");
-			if (strpart.length > 1){ // set class name			
-				obj.name = strpart[1].trim();
-				headerline = false;
-			}
+			if (ParserUtil.validateClassAssociationLine(line)){
+				let associationIdx = ParserUtil.splitAssociationString(line);
+				
+				if (associationIdx > 0){
+					classDef = line.substring(0, associationIdx).trim();
+					assoDef = line.substring(associationIdx, line.length).trim();
+				}else{
+					classDef = line.trim();
+					assoDef = "";
+				}
+				
+				let strpart = classDef.split(" ");
+				if (strpart.length > 1){ // set class name			
+					obj.name = strpart[1].trim();
+					headerline = false;
+				}
 
-			if (assoDef.length > 0){
-				
-				let assoname;	
-				let assobj;
-				let superclass;
-				
-				let assoArr = defineAssociationObj(assoDef);
-				console.log(assoArr.length);	
-				
+				if (assoDef.length > 0){
+					
+					let assoname;	
+					let assobj;
+					let superclass;
+					
+					let assoArr = ParserUtil.defineAssociationObj(assoDef);
+					console.log(assoArr.length);	
+					
 
-				if (assoArr.length > 0){ // has interface but no super class
-					superclass = assoArr[0].substring(3,assoArr[0].length).trim();
-					assobj = lookUpObjectByName(superclass);
-					if (assobj)
-					{
-						obj.extends(assobj);
+					if (assoArr.length > 0){ // has interface but no super class
+						superclass = assoArr[0].substring(3,assoArr[0].length).trim();
+						assobj = ParserUtil.lookUpObjectByName(superclass);
+						if (assobj)
+						{
+							obj.extends(assobj);
+						}
+					}
+					
+					for (var i=1; i < assoArr.length; i++){		// Interface				
+						assoname = assoArr[i].trim();	
+						assobj = ParserUtil.lookUpObjectByName(assoname);
+						if (assobj)
+						{
+							obj.implements(assobj);
+						}					
 					}
 				}
-				
-				for (var i=1; i < assoArr.length; i++){		// Interface				
-					assoname = assoArr[i].trim();	
-					assobj = lookUpObjectByName(assoname);
-					if (assobj)
-					{
-						obj.implements(assobj);
-					}					
-				}
 			}
-
 		}else{
 			// parse line
-			if (validateClassLine(line)){
+			if (ParserUtil.validateClassLine(line)){
 				
-				let vis = getVisibility(line);
+				let vis = ParserUtil.getVisibility(line);
 				if (vis.length == 0) {
-					reader.position--;
+					reader.back();
 					break; 
 				}
 				
-				let attr_method = getMethodOrAttr(line);
+				let attr_method = ParserUtil.getMethodOrAttr(line);
 				
-				let bmethod = isMethod(attr_method[0]);
+				let bmethod = ParserUtil.isMethod(attr_method[0]);
 				
 				if (bmethod){
-					obj.addMethod(createUMLMethod(vis[0], attr_method));
+					obj.addMethod(ParserUtil.createUMLMethod(vis[0], attr_method));
 				}else{
-					obj.addAttribute(createUMLAttribute(vis[0], attr_method));
+					obj.addAttribute(ParserUtil.createUMLAttribute(vis[0], attr_method));
 				}
 				
 			}else{
@@ -207,7 +211,7 @@ class UML_InterfaceParser
 	console.log( "UML_InterfaceParser.read()");
     // read and create Class Object
 	let obj = new UML_Interface();
-	reader.position--;
+	reader.back();
 	
 	let headerline = true;
 	
@@ -217,49 +221,50 @@ class UML_InterfaceParser
 
     while (line = reader.read()){
 		if (headerline){ 
-			let associationIdx = splitAssociationString(line);
-			
-			if (associationIdx > 0){
-				classDef = line.substring(0, associationIdx).trim();
-				assoDef = line.substring(associationIdx, line.length).trim();
-			}else{
-				classDef = line.trim();
-				assoDef = "";
-			}
-			
-			let strpart = classDef.split(" ");
-			if (strpart.length > 1){ // set interface name			
-				obj.name = strpart[1].trim();
-				headerline = false;
-			}
-			
-			if (assoDef.length > 0){
+			if (ParserUtil.validateInterfaceAssociationLine(line)){
+				let associationIdx = ParserUtil.splitAssociationString(line);
 				
-				let assoname;	
-				let assobj;
-				let superclass;
-
-				superclass = assoDef.substring(3,assoDef.length).trim();
-				assobj = lookUpObjectByName(superclass);
-				if (assobj)
-				{
-					obj.extends(assobj);
+				if (associationIdx > 0){
+					classDef = line.substring(0, associationIdx).trim();
+					assoDef = line.substring(associationIdx, line.length).trim();
+				}else{
+					classDef = line.trim();
+					assoDef = "";
 				}
-			}			
-			
+				
+				let strpart = classDef.split(" ");
+				if (strpart.length > 1){ // set interface name			
+					obj.name = strpart[1].trim();
+					headerline = false;
+				}
+				
+				if (assoDef.length > 0){
+					
+					let assoname;	
+					let assobj;
+					let superclass;
+
+					superclass = assoDef.substring(3,assoDef.length).trim();
+					assobj = ParserUtil.lookUpObjectByName(superclass);
+					if (assobj)
+					{
+						obj.extends(assobj);
+					}
+				}			
+			}
 		}else{
 			// parse line
-			if (validateInterfaceLine(line)){
+			if (ParserUtil.validateInterfaceLine(line)){
 				
 				// must be '+'
-				let vis = getVisibility(line);
+				let vis = ParserUtil.getVisibility(line);
 				if (vis.length == 0) {
-					reader.position--;
+					reader.back();
 					break; 
 				}
-				let attr_method = getMethodOrAttr(line);
+				let attr_method = ParserUtil.getMethodOrAttr(line);
 
-				obj.addMethod(createUMLMethod(vis, attr_method));
+				obj.addMethod(ParserUtil.createUMLMethod(vis, attr_method));
 				
 			}else{
 				// Error Handling
@@ -272,11 +277,13 @@ class UML_InterfaceParser
     
   }
 }
-
-function createUMLMethod(vis, strArr){
+class ParserUtil
+{
+static createUMLMethod(vis, strArr){
 	
 	let param;
-	let arrParam = getMethodParam(strArr[0]);
+	let i;
+	let arrParam = ParserUtil.getMethodParam(strArr[0]);
 
 	let objMethod = new UML_Method(vis, strArr[0].substring(0,strArr[0].indexOf('(')).trim(), strArr[1].trim());
 	
@@ -289,7 +296,7 @@ function createUMLMethod(vis, strArr){
 	
 }
 
-function createUMLAttribute(vis, strArr){
+static createUMLAttribute(vis, strArr){
 	
 	let objAttribute = new UML_Attribute(vis, strArr[0].trim(), strArr[1].trim());
 	
@@ -297,7 +304,7 @@ function createUMLAttribute(vis, strArr){
 	
 }
 
-function validateClassAssociationLine(str){
+static validateClassAssociationLine(str){
 	// Pending implementation
 	// TODO:
 	/*
@@ -307,8 +314,10 @@ function validateClassAssociationLine(str){
 		(4) must be separated by a name in between
 		(5) >> must go first, then multiple || follows
 	*/
+	/*
 	let x = 0;
 	let y = 0;
+	let j = 0;
 
 	// meet (1) requirements
 	for(j=0; j<str.length; j++) {
@@ -329,16 +338,19 @@ function validateClassAssociationLine(str){
 			return false;
 	if(!(str.match(regex_1)))
 			return false;
+	*/
+	return true;
 
 }
 
-function validateInterfaceAssociationLine(str){
+static validateInterfaceAssociationLine(str){
 	// Pending implementation
 	// TODO:
 	/*
 		(1) can only have one >>
 		(2) must be separated by a name in between
 	*/
+	/*
 	var regex_1 = /[>]{2}/; // define only can have one >> characters under string
 
 	if(str[0].match(">") || str[str.length-1].match(">"))
@@ -353,12 +365,14 @@ function validateInterfaceAssociationLine(str){
 		}
 	}
 	if(x<=1 || x>=3)
-		return fales;
+		return false;
 
 		return true; // final return true value
+	*/
+	return true;
 }
 
-function validateClassLine(str){
+static validateClassLine(str){
 	// Pending implementation
 	// TODO:
 	/*
@@ -370,7 +384,7 @@ function validateClassLine(str){
 }
 
 
-function validateInterfaceLine(str){
+static validateInterfaceLine(str){
 	// Pending implementation
 	// TODO:
 	// only accept methods
@@ -382,7 +396,7 @@ function validateInterfaceLine(str){
 	return true;
 }
 
-function defineAssociationObj(str){
+static defineAssociationObj(str){
 	
 	let arrImp = [];
 	// split the >> class and || implementations and return as array
@@ -399,8 +413,9 @@ function defineAssociationObj(str){
 	
 }
 
-function lookUpObjectByName(str){
+static lookUpObjectByName(str){
 	
+	let i;
 	for (i=0; i<arr.length; i++){
 		if (arr[i].name == str){
 			return arr[i];
@@ -409,7 +424,7 @@ function lookUpObjectByName(str){
 	return null;
 }
 
-function splitAssociationString(str){
+static splitAssociationString(str){
 
 	let regex = /\>[^>]{0}\> | \|[^|]{0}\|/;
 	let asso = null;	
@@ -425,7 +440,7 @@ function splitAssociationString(str){
 	
 }
 
-function getVisibility(str){
+static getVisibility(str){
 	
 	let visrx = /[\+\-\~\#]/;
 	let ovis;
@@ -441,7 +456,7 @@ function getVisibility(str){
 	}
 }
 
-function getMethodOrAttr(str){
+static getMethodOrAttr(str){
 	
 	// attribute / method name and type (separated by ':') 
 	let attr_method_name = str.substring(1,str.length).trim();
@@ -454,7 +469,7 @@ function getMethodOrAttr(str){
 	return strs;
 }
 
-function isMethod(str){
+static isMethod(str){
 	
 	let bmethod = false;
 	
@@ -471,7 +486,7 @@ function isMethod(str){
 	return bmethod;
 }
 
-function getMethodParam(str){
+static getMethodParam(str){
 	
 	let strParam;
 	let params;
@@ -491,7 +506,7 @@ function getMethodParam(str){
 	
 	return params;
 }
-
+}
 function myFunction() {
   var x = document.getElementById("txt-syntax");
   document.getElementById("sec-output").innerHTML = x.value;
