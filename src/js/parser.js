@@ -120,6 +120,7 @@ class UML_ClassParser
     let line;
 	let classDef;
 	let assoDef;
+	let i;
     while (line = reader.read()){
 
 		if (headerline){ 
@@ -159,7 +160,7 @@ class UML_ClassParser
 						}
 					}
 					
-					for (var i=1; i < assoArr.length; i++){		// Interface				
+					for (i=1; i < assoArr.length; i++){		// Interface				
 						assoname = assoArr[i].trim();	
 						assobj = ParserUtil.lookUpObjectByName(assoname);
 						if (assobj)
@@ -398,6 +399,7 @@ static validateInterfaceLine(str){
 
 static defineAssociationObj(str){
 	
+	let i;
 	let arrImp = [];
 	// split the >> class and || implementations and return as array
 	if (str.trim().length > 0){
