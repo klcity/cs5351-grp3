@@ -84,7 +84,7 @@ class LineReader
   {
     // check file end
     if (this.position > this.lines.length) {
- 	  return false;
+	  return false;
     }
 
     let line;
@@ -103,8 +103,131 @@ class LineReader
   }
 }
 
+class UML_ObjectParser
+{
+  createUMLMethod(vis, strArr){
+
+    let param;
+    let i;
+    let arrParam = this.getMethodParam(strArr[0]);
+
+    let objMethod = new UML_Method(vis, strArr[0].substring(0,strArr[0].indexOf('(')).trim(), strArr[1].trim());
+
+    for (i=0; i<arrParam.length; i++){
+        param = arrParam[i].trim().split(' ');
+        objMethod.addParam(param[0].trim(), param[1].trim());
+    }
+
+    return objMethod;
+
+  }
+
+  createUMLAttribute(vis, strArr){
+
+    let objAttribute = new UML_Attribute(vis, strArr[0].trim(), strArr[1].trim());
+
+    return objAttribute;
+
+  }
+
+  lookUpObjectByName(str){
+
+    let i;
+    for (i=0; i<arr.length; i++){
+        if (arr[i].name == str){
+            return arr[i];
+        }
+    }
+    return null;
+  }
+
+  splitAssociationString(str){
+
+	let regex = /\>[^>]{0}\> | \|[^|]{0}\|/;
+	let asso = null;	
+	let idx = -1;
+	let found = str.match(regex);
+	
+	if (found){
+		asso = found[0].trim();
+		idx = str.indexOf(asso);
+	}
+
+	return idx;
+	
+  }
+
+  getVisibility(str){
+	
+	let visrx = /[\+\-\~\#]/;
+	let ovis;
+	
+	if (str.length > 0){
+		ovis = str.trim().match(visrx);
+		if (ovis){
+			return ovis;
+		}
+		return "";
+	}else{
+		return "";
+	}
+  }
+
+  getMethodOrAttr(str){
+	
+	// attribute / method name and type (separated by ':') 
+	let attr_method_name = str.substring(1,str.length).trim();
+	
+	let strs;
+	if (attr_method_name.length > 0){
+		strs = attr_method_name.split(':');
+	}
+	
+	return strs;
+}
+
+  isMethod(str){
+	
+	let bmethod = false;
+	
+	let methodrx = /\([^)]*\)/;
+	let omethod;
+	
+	if (str.length > 0){
+		omethod = str.trim().match(methodrx);
+		if (omethod){
+			bmethod = true;
+		}
+	}
+	
+	return bmethod;
+  }
+
+  getMethodParam(str){
+	
+	let strParam;
+	let params;
+	let methodrx = /\([^)]*\)/;
+	let omethod;
+	
+	if (str.length > 0){
+		omethod = str.trim().match(methodrx);
+	}
+	if (omethod){
+		strParam = omethod[0].substring(1,omethod[0].length-1);
+	}
+	if (strParam.trim().length > 0)
+		params = strParam.trim().split(',');
+	else
+		params = [];
+	
+	return params;
+  }  
+
+}
+
 // -------------------------------------
-class UML_ClassParser
+class UML_ClassParser extends UML_ObjectParser
 {
   read(reader)
   {
@@ -124,7 +247,7 @@ class UML_ClassParser
 
 		if (headerline){ 
 			if (ParserUtil.validateClassAssociationLine(line)){
-				let associationIdx = ParserUtil.splitAssociationString(line);
+				let associationIdx = this.splitAssociationString(line);
 				
 				if (associationIdx > 0){
 					classDef = line.substring(0, associationIdx).trim();
@@ -146,13 +269,13 @@ class UML_ClassParser
 					let assobj;
 					let superclass;
 					
-					let assoArr = ParserUtil.defineAssociationObj(assoDef);
+					let assoArr = this.defineAssociationObj(assoDef);
 					console.log(assoArr.length);	
 					
 
 					if (assoArr.length > 0){ // has interface but no super class
 						superclass = assoArr[0].substring(3,assoArr[0].length).trim();
-						assobj = ParserUtil.lookUpObjectByName(superclass);
+						assobj = this.lookUpObjectByName(superclass);
 						if (assobj)
 						{
 							obj.extends(assobj);
@@ -161,7 +284,7 @@ class UML_ClassParser
 					
 					for (i=1; i < assoArr.length; i++){		// Interface				
 						assoname = assoArr[i].trim();	
-						assobj = ParserUtil.lookUpObjectByName(assoname);
+						assobj = this.lookUpObjectByName(assoname);
 						if (assobj)
 						{
 							obj.implements(assobj);
@@ -173,20 +296,20 @@ class UML_ClassParser
 			// parse line
 			if (ParserUtil.validateClassLine(line)){
 				
-				let vis = ParserUtil.getVisibility(line);
+				let vis = this.getVisibility(line);
 				if (vis.length == 0) {
 					reader.back();
 					break; 
 				}
 				
-				let attr_method = ParserUtil.getMethodOrAttr(line);
+				let attr_method = this.getMethodOrAttr(line);
 				
-				let bmethod = ParserUtil.isMethod(attr_method[0]);
+				let bmethod = this.isMethod(attr_method[0]);
 				
 				if (bmethod){
-					obj.addMethod(ParserUtil.createUMLMethod(vis[0], attr_method));
+					obj.addMethod(this.createUMLMethod(vis[0], attr_method));
 				}else{
-					obj.addAttribute(ParserUtil.createUMLAttribute(vis[0], attr_method));
+					obj.addAttribute(this.createUMLAttribute(vis[0], attr_method));
 				}
 				
 			}else{
@@ -201,10 +324,28 @@ class UML_ClassParser
     //throw `Error found on line ${lineNumber}`;
 
   }
+  
+  defineAssociationObj(str){
+
+    let i;
+    let arrImp = [];
+    // split the >> class and || implementations and return as array
+    if (str.trim().length > 0){
+        // 1. split by || first 
+        // 2. the 1st element will be empty (no superclass) or >> XXX (has superclass)
+
+        arrImp = str.split("||");
+        for (i = 0; i<arrImp.length; i++){
+            console.log(arrImp[i]);
+        }
+    }
+    return arrImp;
+
+  }  
 }
 
 // -------------------------------------
-class UML_InterfaceParser
+class UML_InterfaceParser extends UML_ObjectParser
 {
   read(reader)
   {
@@ -222,7 +363,7 @@ class UML_InterfaceParser
     while (line = reader.read()){
 		if (headerline){ 
 			if (ParserUtil.validateInterfaceAssociationLine(line)){
-				let associationIdx = ParserUtil.splitAssociationString(line);
+				let associationIdx = this.splitAssociationString(line);
 				
 				if (associationIdx > 0){
 					classDef = line.substring(0, associationIdx).trim();
@@ -245,7 +386,7 @@ class UML_InterfaceParser
 					let superclass;
 
 					superclass = assoDef.substring(3,assoDef.length).trim();
-					assobj = ParserUtil.lookUpObjectByName(superclass);
+					assobj = this.lookUpObjectByName(superclass);
 					if (assobj)
 					{
 						obj.extends(assobj);
@@ -257,14 +398,14 @@ class UML_InterfaceParser
 			if (ParserUtil.validateInterfaceLine(line)){
 				
 				// must be '+'
-				let vis = ParserUtil.getVisibility(line);
+				let vis = this.getVisibility(line);
 				if (vis.length == 0) {
 					reader.back();
 					break; 
 				}
-				let attr_method = ParserUtil.getMethodOrAttr(line);
+				let attr_method = this.getMethodOrAttr(line);
 
-				obj.addMethod(ParserUtil.createUMLMethod(vis, attr_method));
+				obj.addMethod(this.createUMLMethod(vis, attr_method));
 				
 			}else{
 				// Error Handling
@@ -277,32 +418,9 @@ class UML_InterfaceParser
     
   }
 }
+
 class ParserUtil
 {
-static createUMLMethod(vis, strArr){
-	
-	let param;
-	let i;
-	let arrParam = ParserUtil.getMethodParam(strArr[0]);
-
-	let objMethod = new UML_Method(vis, strArr[0].substring(0,strArr[0].indexOf('(')).trim(), strArr[1].trim());
-	
-	for (i=0; i<arrParam.length; i++){
-		param = arrParam[i].trim().split(' ');
-		objMethod.addParam(param[0].trim(), param[1].trim());
-	}
-	
-	return objMethod;
-	
-}
-
-static createUMLAttribute(vis, strArr){
-	
-	let objAttribute = new UML_Attribute(vis, strArr[0].trim(), strArr[1].trim());
-	
-	return objAttribute;
-	
-}
 
 static validateClassAssociationLine(str){
 	// Pending implementation
@@ -396,117 +514,7 @@ static validateInterfaceLine(str){
 	return true;
 }
 
-static defineAssociationObj(str){
-	
-	let i;
-	let arrImp = [];
-	// split the >> class and || implementations and return as array
-	if (str.trim().length > 0){
-		// 1. split by || first 
-		// 2. the 1st element will be empty (no superclass) or >> XXX (has superclass)
 
-		arrImp = str.split("||");
-		for (i = 0; i<arrImp.length; i++){
-			console.log(arrImp[i]);
-		}
-	}
-	return arrImp;
-	
-}
-
-static lookUpObjectByName(str){
-	
-	let i;
-	for (i=0; i<arr.length; i++){
-		if (arr[i].name == str){
-			return arr[i];
-		}
-	}
-	return null;
-}
-
-static splitAssociationString(str){
-
-	let regex = /\>[^>]{0}\> | \|[^|]{0}\|/;
-	let asso = null;	
-	let idx = -1;
-	let found = str.match(regex);
-	
-	if (found){
-		asso = found[0].trim();
-		idx = str.indexOf(asso);
-	}
-
-	return idx;
-	
-}
-
-static getVisibility(str){
-	
-	let visrx = /[\+\-\~\#]/;
-	let ovis;
-	
-	if (str.length > 0){
-		ovis = str.trim().match(visrx);
-		if (ovis){
-			return ovis;
-		}
-		return "";
-	}else{
-		return "";
-	}
-}
-
-static getMethodOrAttr(str){
-	
-	// attribute / method name and type (separated by ':') 
-	let attr_method_name = str.substring(1,str.length).trim();
-	
-	let strs;
-	if (attr_method_name.length > 0){
-		strs = attr_method_name.split(':');
-	}
-	
-	return strs;
-}
-
-static isMethod(str){
-	
-	let bmethod = false;
-	
-	let methodrx = /\([^)]*\)/;
-	let omethod;
-	
-	if (str.length > 0){
-		omethod = str.trim().match(methodrx);
-		if (omethod){
-			bmethod = true;
-		}
-	}
-	
-	return bmethod;
-}
-
-static getMethodParam(str){
-	
-	let strParam;
-	let params;
-	let methodrx = /\([^)]*\)/;
-	let omethod;
-	
-	if (str.length > 0){
-		omethod = str.trim().match(methodrx);
-	}
-	if (omethod){
-		strParam = omethod[0].substring(1,omethod[0].length-1);
-	}
-	if (strParam.trim().length > 0)
-		params = strParam.trim().split(',');
-	else
-		params = [];
-	
-	return params;
-}
 }
 function myFunction() {
   var x = document.getElementById("txt-syntax");
