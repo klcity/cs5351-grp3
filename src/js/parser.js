@@ -84,8 +84,7 @@ class LineReader
   {
     // check file end
     if (this.position > this.lines.length) {
-      //throw 'EOF';
-	  return false;
+ 	  return false;
     }
 
     let line;
