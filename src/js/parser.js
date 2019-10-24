@@ -479,16 +479,17 @@ static validateInterfaceAssociationLine(str){
 
 	let x = 0;
 	for(j=0; j<str.length; j++) {
-		if(str[j].match(">") {
+		if(str[j].match(">")) {
 			x++;
 		}
+			
 	}
 	if(x<=1 || x>=3)
 		return false;
 
 		return true; // final return true value
 	
-	return true;
+	//return true;
 }
 
 static validateClassLine(str){
@@ -518,9 +519,14 @@ static validateInterfaceLine(str){
 
 }
 function myFunction() {
-  str x = document.getElementById("txt-syntax").value;
-  document.getElementById("sec-output").innerHTML = x;
-  window.alert("testing");
+  var x = document.getElementById("txt-syntax");
+
+  document.getElementById("sec-output").innerHTML = x.value;
+  var abc = validateInterfaceAssociationLine(">asdf>");
+  if (abc == Boolean('true'))
+	window.alert("True")
+	else
+	window.alert("False");
 }
 
 function clearFunction() {
