@@ -518,7 +518,7 @@ static validateInterfaceLine(str){
 
 }
 function myFunction() {
-  str x = document.getElementById("txt-syntax");
+  var x = document.getElementById("txt-syntax");
   document.getElementById("sec-output").innerHTML = x.value;
 }
 
