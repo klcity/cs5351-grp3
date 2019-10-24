@@ -315,6 +315,7 @@ class UML_ClassParser extends UML_ObjectParser
 			}else{
 				// Error Handling
 				// TODO:
+
 			}			
 		}
 	}
@@ -468,7 +469,7 @@ static validateInterfaceAssociationLine(str){
 		(1) can only have one >>
 		(2) must be separated by a name in between
 	*/
-	/*
+	
 	var regex_1 = /[>]{2}/; // define only can have one >> characters under string
 
 	if(str[0].match(">") || str[str.length-1].match(">"))
@@ -486,7 +487,7 @@ static validateInterfaceAssociationLine(str){
 		return false;
 
 		return true; // final return true value
-	*/
+	
 	return true;
 }
 
@@ -517,7 +518,7 @@ static validateInterfaceLine(str){
 
 }
 function myFunction() {
-  var x = document.getElementById("txt-syntax");
+  str x = document.getElementById("txt-syntax");
   document.getElementById("sec-output").innerHTML = x.value;
 }
 
