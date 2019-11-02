@@ -56,7 +56,10 @@ class Parser
             break;
         }
 		// collect object
-        if (obj) { arr.push(obj); }
+        if (obj) { 
+		    if (obj.name.length > 0)
+				arr.push(obj); 
+		}
       }
 
     }
@@ -223,6 +226,25 @@ class UML_ObjectParser
 	
 	return params;
   }  
+  
+  checkOnlyOneExtend(str){
+	str = str.trim();
+    var regex_1 = str.match(/[>]{2}/g); // define only can have one >> characters under string
+    var regex_2 = str.match(/[>]/g);	
+
+	var res = true;
+	
+	if(str[0].match(">") || str[str.length-1].match(">"))
+		res = false;
+	else if (regex_1 || regex_2)
+	{
+		if (regex_2.length != 2)
+			res = false;
+		else if (regex_1.length != 1)
+			res = false;
+	}
+    return res;    
+  }
 
 }
 
@@ -246,7 +268,7 @@ class UML_ClassParser extends UML_ObjectParser
     while (line = reader.read()){
 
 		if (headerline){ 
-			if (ParserUtil.validateClassAssociationLine(line)){
+			if (this.validateAssociationLine(line)){
 				let associationIdx = this.splitAssociationString(line);
 				
 				if (associationIdx > 0){
@@ -343,6 +365,66 @@ class UML_ClassParser extends UML_ObjectParser
     return arrImp;
 
   }  
+  
+ validateAssociationLine(str){
+
+  /*
+    (1) can have >> or || on the line
+    (2) can only have one >>
+    (3) can be multiple ||
+    (4) must be separated by a name in between
+    (5) >> must go first, then multiple || follows
+  */
+	
+	var res = true;
+	// (2) can only have one >>
+	res = this.checkOnlyOneExtend(str);
+	
+	// (3) can have multiple ||	
+    // (4) must be separated by a name in between
+	if (res)
+		res = this.checkMultipleImplement(str);
+	
+	// (5) >> must go first, then multiple || follows
+	if (res) {
+	var a = str.indexOf(">>");
+	var b = str.indexOf("||");
+	
+	if (a>0 || b>0)
+		res = (a < b);
+	}
+	
+	return res;
+ }  
+
+ checkMultipleImplement(str){
+	str = str.trim();
+    var regex_1 = str.match(/[|]{2}/g); // define only can have one >> characters under string
+    var regex_2 = str.match(/[|]/g);	
+	var a = str.split('||');
+
+	var res = true;
+	
+	if (regex_1 || regex_2)
+	{
+		if (regex_2.length%2 != 0)
+			res = false;
+		else {
+			var n = regex_1.length;
+			var i;
+			if (n == a.length-1){
+				for (i=1; i<a.length; i++){
+					if (a[i].trim().length == 0)
+						res = false;
+				}					
+			}else{
+				res = false;
+			}
+		}
+	}
+    return res;    
+  } 
+
 }
 
 // -------------------------------------
@@ -363,7 +445,7 @@ class UML_InterfaceParser extends UML_ObjectParser
 
     while (line = reader.read()){
 		if (headerline){ 
-			if (ParserUtil.validateInterfaceAssociationLine(line)){
+			if (this.validateAssociationLine(line)){
 				let associationIdx = this.splitAssociationString(line);
 				
 				if (associationIdx > 0){
@@ -417,6 +499,18 @@ class UML_InterfaceParser extends UML_ObjectParser
 	console.log(obj);
 	return obj;
     
+  }
+
+  validateAssociationLine(str){
+	  
+	/*
+		(1) can only have one >>
+		(2) must be separated by a name in between
+	*/
+	var res = this.checkOnlyOneExtend(str);
+	
+	return res;
+	 
   }
 }
 
@@ -477,6 +571,7 @@ static validateInterfaceAssociationLine(str){
 	if(!(str.match(regex_1)))
 		return false;
 
+/*
 	let x = 0;
 	for(j=0; j<str.length; j++) {
 		if(str[j].match(">")) {
@@ -488,8 +583,10 @@ static validateInterfaceAssociationLine(str){
 		return false;
 
 		return true; // final return true value
-	
+*/
 	//return true;
+
+	
 }
 
 static validateClassLine(str){
@@ -522,7 +619,10 @@ function myFunction() {
   var x = document.getElementById("txt-syntax");
 
   document.getElementById("sec-output").innerHTML = x.value;
-  var abc = validateInterfaceAssociationLine(">asdf>");
+  //var obj = new UML_InterfaceParser();
+  //var abc = obj.validateAssociationLine("interface Professor >> Person  ");
+  var obj = new UML_ClassParser();
+  var abc = obj.validateAssociationLine("class Professor >> Person ||ILicenseTest|| IExpatriate ");
   if (abc == Boolean('true'))
 	window.alert("True")
 	else
