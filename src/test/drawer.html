@@ -3,12 +3,12 @@
     <head>
         <meta charset="utf-8">
         <title></title>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     </head>
     <body>
-        <div>
-  <svg viewBox="-1200 -100 2500 1500">
-  <!-- <svg viewBox="-450 -100 1000 1200"> -->
-    <defs>
+        <div id="app">
+  <svg viewBox="-600 0 1200 1000">
+     <defs>
       <style>
         .cls-box {
           stroke: 1px solid block;
@@ -22,33 +22,49 @@
         .cls-box:hover ~ .dg2 { stroke: blue; }
       </style>
     </defs>
-    <g id="app">
+  
+    <g>
 
-      <g v-for="r in graph">
-        <text :x="r.X" :y="r.Y">{{ r.name }} - {{ r.ew }}</text>
+      <g v-for="r in rect">
         <rect class="cls-box" stroke="black"
               :x="r.X" :y="r.Y"
               :width="r.w" :height="r.h"></rect>
-        <text class="cls-name"
-              :x="r.X + 10" :y="r.Y + 20">{{ r.name }}</text>
+        <g>
+          <text class="cls-name"
+                :x="r.X + 10" :y="r.Y + 20">{{ r.name }}</text>
+        </g>
+
         <line class="cls-line" stroke="black"
-              :x1="r.X" :y1="r.Y + 30"
-              :x2="r.X + r.w" :y2="r.Y + 30"/>
-        <text v-for="(detail, index) in r.attrs"
-              :x="r.X + 10" :y="r.Y + 30 + (index + 1) * 20">
-              {{r.attrs[index].modifier + " " + r.attrs[index].name + ": " + r.attrs[index].type}}</text>
+              :x1="r.X" :y1="r.ClassNameSeparatorY"
+              :x2="r.X + r.w" :y2="r.ClassNameSeparatorY"/>
+
+        <g>
+          <text v-for="(d, idx) in r.attrs"
+            :x="r.X + 10" :y="r.Y + 30 + (idx + 1) * 20">
+            {{ d }}</text>
+          
+        </g>
         <line class="cls-line" stroke="black"
-              :x1="r.X" :y1="r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30"
-              :x2="r.X + r.w" :y2="r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30" />
-        <text v-for="(detail, index) in r.methods"
-              :x="r.X + 10" :y="(r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30) + (index + 1) * 20">
-              {{r.methods[index].modifier + " " + r.methods[index].name + "(" + r.methods[index].parameters + "): " + r.methods[index].type}}</text>
+            :x1="r.X" :y1="r.AttributesSeparatorY"
+            :x2="r.X + r.w" :y2="r.AttributesSeparatorY" />
+        <!--
+
+          <text v-for="(d, idx) in r.attrs"
+          :x="r.X + 10" :y="r.Y + 30 + (idx + 1) * 20">
+          {{ r.attrs[idx].modifier + " " + r.attrs[idx].name + ": " + r.attrs[idx].type }}</text>
+        -->
+
+
+        <g>
+          <text v-for="(d, idx) in r.methods"
+                :x="r.X + 10" :y="(r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30) + (idx + 1) * 20">
+                {{ d }}</text>
+        </g>
 
 
         <line v-if="r.parent" class="assc"
               :x1="r.x" :y1="r.Y"
               :x2="r.parent.x" :y2="r.parent.Y + r.parent.h"></line>
-
       </g>
 
     </g>
@@ -56,7 +72,11 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-<script src="test.js"></script>
-
+<script src="test1.js"></script>
+<script>
+    // var s = document.querySelector('#app').getBBox();
+    // var newView = s.x + " " + s.y + " " + s.width + " " + s.height;
+    // document.querySelector('svg').setAttribute("viewBox", newView);
+</script>
     </body>
 </html>

@@ -1,3 +1,78 @@
+class GObj
+{
+  constructor(base)
+  {
+    if (!GObj.__dict__) { GObj.__dict__ = {} };
+    this.x = 0;
+    this.y = 0;
+    this.w = 0;
+    this.h = 0;
+
+    if (base)
+    {
+      this.base = base;
+      this.attrs   = Object.keys(base.attrs  ).map(k => base.attrs[k]);
+      this.methods = Object.keys(base.methods).map(k => base.methods[k]);
+      this.init(base);
+      GObj.__dict__[base.name] = this;
+    } else {
+      this.attrs   = [];
+      this.methods = [];
+    }
+
+  }
+  //---- Adaptor Pattern
+  get name()    { return this.base.name; }
+  get parent()  {
+    if (!this.base.parent) return null;
+    return GObj.__dict__[this.base.parent.name]
+        || new GObj(this.base.parent);
+  }
+  //--
+
+  init(base)
+  {
+    // Set box height
+    this.h = 30 + (this.attrs.length + (this.attrs.length - 1))     * 10
+           + 20 + (this.methods.length + (this.methods.length - 1)) * 10
+           + 20;
+
+    // Set box width
+    let canvas = document.createElement('canvas');
+    let context = canvas.getContext('2d');
+    context.font = '20px san-serif';
+
+    let maxWordLength = -1;
+
+    this.attrs.forEach(s => {
+      let rect = context.measureText(s);
+      maxWordLength = Math.max(maxWordLength, rect.width);
+    });
+    this.methods.forEach(s => {
+      let rect = context.measureText(s);
+      maxWordLength = Math.max(maxWordLength, rect.width);
+    });
+    maxWordLength = Math.max(
+      maxWordLength,
+      context.measureText(base.name).width
+    );
+
+    this.w = maxWordLength;
+  }
+  get X() { return this.x - this.w/2; }
+  get Y() { return this.y - this.h/2; }
+
+  get ClassNameSeparatorY() {
+    return this.Y + C.ClassNameHeight;
+  }
+  get AttributesSeparatorY() {
+    return this.ClassNameSeparatorY
+         + this.attrs.length * C.AttributeLineHeight
+         + C.AttributeLineHeight / 2;
+  }
+
+}
+
 class UML_Object
 {
   constructor() {
@@ -29,10 +104,6 @@ class UML_Object
   extends(obj) {
     throw 'NotImplementedException: must be implemented by the subclass';
   }
-  draw(g)
-  {
-    throw 'NotImplementedException: must be implemented by the subclass';
-  }
 }
 
 // -------------------------------------
@@ -55,9 +126,6 @@ class UML_Class extends UML_Object
     // TODO: search whether the interface is already implemented
     this.interfaces.push(obj);
   }
-  draw(g) {
-    throw 'NotImplementedException: pending implement';
-  }
 }
 
 // -------------------------------------
@@ -72,9 +140,6 @@ class UML_Interface extends UML_Object
     }
     this.parent = obj;
   }
-  draw(g) {
-    throw 'NotImplementedException: pending implement';
-  }
 }
 
 // -------------------------------------
@@ -85,6 +150,10 @@ class UML_Attribute
     this.modifier = modifier;
     this.name = name;
     this.type = type;
+  }
+  toString()
+  {
+    return `${this.modifier} ${this.name}:${this.type}`;
   }
 }
 
@@ -102,5 +171,13 @@ class UML_Method
   addParam(type, name)
   {
     this.parameters.push({type: type, name: name});
+  }
+
+  toString()
+  {
+    let param = this.parameters.map(
+      x => `${x.type} ${x.name}`
+    ).join(', ');
+    return `${this.modifier} ${this.name}(${param}):${this.type}`;
   }
 }

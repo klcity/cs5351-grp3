@@ -1,10 +1,6 @@
 'use strict';
 
-window.C = {
-  PAD: 50,
-}
-
-let placeholder = `classs A
+let placeholder = `class A
 +attr:int
 +method(string y):void`;
 
@@ -23,11 +19,28 @@ class App
     };
 
     this.methods = {
-      input: this.input
+      input: this.input,
+      resetViewbox: this.resetViewbox,
     };
 
-  }
+    // note that Vue cannot get in-class methods as created/updated trigger
+    this.created = function() {
+      this.resetViewbox();
+    }
+    this.updated = function() {
+      this.resetViewbox();
+    }
 
+  }
+  resetViewbox() {
+    let root = document.querySelector(this.$options.el);
+    let svg = root.querySelector('svg');
+    let r = svg.getBBox();
+    svg.viewBox.baseVal.x = r.x;
+    svg.viewBox.baseVal.y = r.y;
+    svg.viewBox.baseVal.width = r.width;
+    svg.viewBox.baseVal.height = r.height;
+  }
   input()
   {
     try
@@ -36,15 +49,24 @@ class App
       let model = parser.parse(this.codestr);
 
       if (model.length > 0) {
-        console.log(model);
+        
+        let drawer = new Drawer();
+        let graph = drawer.generateGraph(model);
+
+        this.$data.graph = graph;
+        // console.log(graph);
+        // window.g= graph;
+
       } else {
+
+        // TODO: Show "There is no graph"
+        // debugger;
 
       }
 
-      //this.drawer.draw(this.cvs_graphics, model);
-
     } catch (ex) {
-      /// TODO: place
+      // TODO:: Show Error Messages to users,
+      // tell them what is wrong in their syntax
       console.log('ERROR', ex);
     }
 
@@ -53,28 +75,6 @@ class App
 }
 
 
-
 let app = new App();
 let vue = new Vue(app);
 
-
-
-
-///---- temp
-function setLocation(arr)
-{
-  // create backward links
-  arr.forEach(x => {
-    if (!x.parent) return;
-    if (!x.parent.children) x.parent.children = [];
-    x.parent.children.push(x);
-  });
-
-  // find all roots
-  let roots = arr.filter(x => null == x.parent);
-  console.log(roots);
-
-  // recursive location assignment
-  assignCoord(roots, new GObj(0,0));
-
-}
