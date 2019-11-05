@@ -187,7 +187,61 @@ class UML_ObjectParser
 	}
 	
 	return strs;
-}
+  }
+  
+   checkColonCorrect(str){
+	
+	let strs = this.getMethodOrAttr(str);
+	
+	return (strs.length == 2);
+  }  
+  
+   checkAttrLineCorrect(str){
+	
+	let strs = this.getMethodOrAttr(str);
+	
+	return this.checkAttrNameCorrect(strs[0].trim());
+	
+   }
+
+   checkAttrNameCorrect(str){
+	
+	let bname = true;
+	
+	let namerx = /[^A-Za-z0-9_$]/;
+	let oname;
+	
+	let s = str.trim();
+	
+	if (s.length > 0){
+		oname = s.match(namerx);
+		if (oname){
+			bname = false;
+		}
+	}
+	return bname;
+	
+   }
+
+   checkMethodNameCorrect(str){
+	
+	let bname = true;
+	let strs = this.getMethodOrAttr(str);
+	let s0 = strs[0].trim();
+	let namerx = /[^A-Za-z0-9_$]/;
+	let oname;
+	
+	let s = s0.substr(0,s0.indexOf('('));
+	
+	if (s.length > 0){
+		oname = s.trim().match(namerx);
+		if (oname){
+			bname = false;
+		}
+	}
+	return bname;
+	
+  }    
 
   isMethod(str){
 	
@@ -315,18 +369,20 @@ class UML_ClassParser extends UML_ObjectParser
 				}
 			}
 		}else{
+
+			if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
+				reader.back();
+				break; 
+			}
+				
 			// parse line
-			if (ParserUtil.validateClassLine(line)){
-				
-				let vis = this.getVisibility(line);
-				if (vis.length == 0) {
-					reader.back();
-					break; 
-				}
-				
+			if (this.validateLine(line)){
+
 				let attr_method = this.getMethodOrAttr(line);
 				
 				let bmethod = this.isMethod(attr_method[0]);
+				
+				let vis = this.getVisibility(line);
 				
 				if (bmethod){
 					obj.addMethod(this.createUMLMethod(vis[0], attr_method));
@@ -425,6 +481,56 @@ class UML_ClassParser extends UML_ObjectParser
     return res;    
   } 
 
+  validateLine(str){
+	// Pending implementation
+	// TODO:
+	/*
+		(1) modifier must be + - # ~
+		(2) name must not contain special characters except _ and $
+	*/
+	// (1) modifier only appear in the first character	
+	let visrx = /^[\+\-\~\#]/;
+	let ovis;
+	let matched = true;
+	
+	if (str.length > 0){
+		ovis = str.trim().match(visrx);
+		if (ovis == null)
+			matched = false;
+		else{
+		  ovis = str.substr(1,str.len).match(visrx);
+		  if (ovis)
+			matched = false;
+		}		
+	}
+	
+	// (2) check ':' exists
+	if (matched)
+		matched = this.checkColonCorrect(str);
+	// (3) name must not contain special characters except _ and $
+	if (matched){
+		if (this.isMethod(str)){
+			matched = this.checkMethodNameCorrect(str);
+			// check attr names must not contain special characters except _ and $
+			let param;
+			let i;
+			let arrParam = this.getMethodParam(str);
+
+			for (i=0; i<arrParam.length; i++){
+				param = arrParam[i].trim().split(' ');
+				if (matched)
+					matched = this.checkAttrNameCorrect(param[1].trim());
+			}
+
+		}else{
+			matched = this.checkAttrLineCorrect(str);
+		}
+	}
+	
+	return matched;
+	//return true;
+  }
+
 }
 
 // -------------------------------------
@@ -477,18 +583,19 @@ class UML_InterfaceParser extends UML_ObjectParser
 				}			
 			}
 		}else{
+
+			if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
+				reader.back();
+				break; 
+			}
+
 			// parse line
-			if (ParserUtil.validateInterfaceLine(line)){
+			if (this.validateLine(line)){
 				
-				// must be '+'
 				let vis = this.getVisibility(line);
-				if (vis.length == 0) {
-					reader.back();
-					break; 
-				}
 				let attr_method = this.getMethodOrAttr(line);
 
-				obj.addMethod(this.createUMLMethod(vis, attr_method));
+				obj.addMethod(this.createUMLMethod(this.getVisibility(line), attr_method));
 				
 			}else{
 				// Error Handling
@@ -512,6 +619,43 @@ class UML_InterfaceParser extends UML_ObjectParser
 	return res;
 	 
   }
+  
+  validateLine(str){
+	// Pending implementation
+	// TODO:
+	// only accept methods
+	/*
+		(1) modifier must be + (public)
+		(2) name must not contain special characters except _ and $
+	*/
+
+	// (1) modifier only appear in the first character
+	let visrx = /^[\+]/;
+	let ovis;
+	let matched = true;
+	
+	if (str.length > 0){
+		ovis = str.trim().match(visrx);
+		if (ovis == null)
+			matched = false;
+		else{
+		  ovis = str.substr(1,str.len).match(visrx);
+		  if (ovis)
+			matched = false;
+		}
+	}	
+	
+	// (2) check ':' exists
+	if (matched)
+		matched = this.checkColonCorrect(str);
+	
+	// (3) name must not contain special characters except _ and $
+	if (matched)
+		matched = this.checkMethodNameCorrect(str);	
+	
+   return matched;
+//   return true;
+  }  
 }
 
 class ParserUtil
