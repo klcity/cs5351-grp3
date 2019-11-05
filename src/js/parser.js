@@ -3,7 +3,7 @@ var arr = [];
 class Parser
 {
   constructor()
-  {
+  {	
     this.Parsers = {
       Class : new UML_ClassParser(),
       Interface : new UML_InterfaceParser(),
@@ -58,19 +58,26 @@ class Parser
 		// collect object
         if (obj) { 
 		    if (obj.name.length > 0)
-				arr.push(obj); 
+				arr.push(obj);
+			
+			if (this.Parsers.Class.getMessages().length > 0)
+				console.log(this.Parsers.Class.getMessages());
+
+			if (this.Parsers.Interface.getMessages().length > 0)
+				console.log(this.Parsers.Interface.getMessages());
 		}
       }
 
     }
     catch (ex)
     {
-			// TODO: show exception message thrown by the parsers
-			console.log(ex);
+	  // TODO: show exception message thrown by the parsers
+	  console.log(ex);
       console.log(ex.message);
+	  //throw ex;
     }
-    // console.log("arr size: " + arr.length);
-    // console.log(arr);
+    console.log("arr size: " + arr.length);
+    console.log(arr);
 
     return arr;
   }
@@ -79,6 +86,18 @@ class Parser
 // -------------------------------------
 class UML_ObjectParser
 {
+  constructor() {
+    this.err  = [];
+  }	
+	
+  addMessage(str) {
+    this.err.push(str);
+  }
+  
+  getMessages() {
+    return this.err;
+  }
+  
   createUMLMethod(vis, strArr){
 
     let param;
@@ -317,7 +336,7 @@ class UML_ClassParser extends UML_ObjectParser
 					let superclass;
 					
 					let assoArr = this.defineAssociationObj(assoDef);
-					console.log(assoArr.length);	
+					//console.log(assoArr.length);	
 					
 
 					if (assoArr.length > 0){ // has interface but no super class
@@ -368,7 +387,7 @@ class UML_ClassParser extends UML_ObjectParser
 			}			
 		}
 	}
-	console.log(obj);
+	//console.log(obj);
 	return obj;
 	
     //throw `Error found on line ${lineNumber}`;
@@ -385,9 +404,9 @@ class UML_ClassParser extends UML_ObjectParser
         // 2. the 1st element will be empty (no superclass) or >> XXX (has superclass)
 
         arrImp = str.split("||");
-        for (i = 0; i<arrImp.length; i++){
-            console.log(arrImp[i]);
-        }
+        //for (i = 0; i<arrImp.length; i++){
+        //   console.log(arrImp[i]);
+        //}
     }
     return arrImp;
 
@@ -406,19 +425,24 @@ class UML_ClassParser extends UML_ObjectParser
 	var res = true;
 	// (2) can only have one >>
 	res = this.checkOnlyOneExtend(str);
+	if (!res) this.err.push("Invalid inheritenance! Only one superclass allowed.");
 	
 	// (3) can have multiple ||	
     // (4) must be separated by a name in between
-	if (res)
+	if (res){
 		res = this.checkMultipleImplement(str);
-	
+		if (!res) this.err.push("Invalid association!");
+
+	}
 	// (5) >> must go first, then multiple || follows
 	if (res) {
 	var a = str.indexOf(">>");
 	var b = str.indexOf("||");
 	
-	if (a>0 || b>0)
+	if (a>0 || b>0){
 		res = (a < b);
+		if (!res) this.err.push("Invalid association! Inheritance first, then interface implementation.");
+	}	
 	}
 	
 	return res;
@@ -466,22 +490,30 @@ class UML_ClassParser extends UML_ObjectParser
 	
 	if (str.length > 0){
 		ovis = str.trim().match(visrx);
-		if (ovis == null)
+		if (ovis == null){
 			matched = false;
+			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+		}
 		else{
 		  ovis = str.substr(1,str.len).match(visrx);
-		  if (ovis)
+		  if (ovis){
 			matched = false;
+			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+		  }
 		}		
 	}
 	
 	// (2) check ':' exists
-	if (matched)
+	if (matched){
 		matched = this.checkColonCorrect(str);
+		if (!matched) this.err.push("Missing separator ':'");
+	}
 	// (3) name must not contain special characters except _ and $
 	if (matched){
 		if (this.isMethod(str)){
 			matched = this.checkMethodNameCorrect(str);
+			if (!matched) this.err.push("Invalid method name! Name must not contain special characters except _ and $.");
+
 			// check attr names must not contain special characters except _ and $
 			let param;
 			let i;
@@ -489,8 +521,11 @@ class UML_ClassParser extends UML_ObjectParser
 
 			for (i=0; i<arrParam.length; i++){
 				param = arrParam[i].trim().split(' ');
-				if (matched)
+				if (matched){
 					matched = this.checkAttrNameCorrect(param[1].trim());
+					if (!matched) this.err.push("Invalid attribute name! Name must not contain special characters except _ and $.");
+
+				}
 			}
 
 		}else{
@@ -586,6 +621,7 @@ class UML_InterfaceParser extends UML_ObjectParser
 		(2) must be separated by a name in between
 	*/
 	var res = this.checkOnlyOneExtend(str);
+	if (!res) this.err.push("Invalid inheritenance! Only one superclass allowed.");
 	
 	return res;
 	 
@@ -607,22 +643,52 @@ class UML_InterfaceParser extends UML_ObjectParser
 	
 	if (str.length > 0){
 		ovis = str.trim().match(visrx);
-		if (ovis == null)
+		if (ovis == null){
 			matched = false;
-		else{
+			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+		}else{
 		  ovis = str.substr(1,str.len).match(visrx);
-		  if (ovis)
+		  if (ovis){
 			matched = false;
+			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+
+		  }
 		}
 	}	
 	
 	// (2) check ':' exists
-	if (matched)
+	if (matched){
 		matched = this.checkColonCorrect(str);
+		if (!matched) this.err.push("Missing separator ':'");
+	}
 	
 	// (3) name must not contain special characters except _ and $
-	if (matched)
-		matched = this.checkMethodNameCorrect(str);	
+	if (matched){
+		if (this.isMethod(str)){
+			matched = this.checkMethodNameCorrect(str);
+			if (!matched) this.err.push("Invalid method name! Name must not contain special characters except _ and $.");
+
+			// check attr names must not contain special characters except _ and $
+			let param;
+			let i;
+			let arrParam = this.getMethodParam(str);
+
+			for (i=0; i<arrParam.length; i++){
+				param = arrParam[i].trim().split(' ');
+				if (matched){
+					matched = this.checkAttrNameCorrect(param[1].trim());
+					if (!matched) this.err.push("Invalid attribute name! Name must not contain special characters except _ and $.");
+
+				}
+			}
+
+		}else{
+			matched = this.checkAttrLineCorrect(str);
+		}
+	}
+		
+	
+	
 	
    return matched;
 //   return true;
