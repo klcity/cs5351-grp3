@@ -24,8 +24,10 @@
       <textarea rows="10" cols="50"
                 v-model="codestr"
                 @input="input()" :placeholder="placeholder"></textarea>
-    </section>
 
+    </section>
+    <div class="err-msg">{{ errMsg }}</div>
+    
     <section id="sec-output">
       <span v-if="!graph.length">
         No Graph
@@ -72,7 +74,6 @@
 
     </section>
 
-    <span class="err-msg">{{ errMsg }}</span>
 
   </form>
 </body>

@@ -1,5 +1,3 @@
-var arr = [];
-
 class Parser
 {
   constructor()
@@ -8,11 +6,22 @@ class Parser
       Class : new UML_ClassParser(),
       Interface : new UML_InterfaceParser(),
     };
+	this.arr = [];
+	this.out_err = [];
   }
 
+  getErrorMsg()
+  {
+	  let i;
+	  let out_str = "";
+      for (i=0; i<this.out_err.length; i++){
+		out_str = out_str + this.out_err[i] + "\n";
+	  }
+	  return out_str;
+  }
   parse(raw_syntax)
   {
-    arr = [];
+    this.arr = [];
     let reader = new LineReader(raw_syntax);
 
     // TODO: read the text and construct models
@@ -58,13 +67,13 @@ class Parser
 		// collect object
         if (obj) { 
 		    if (obj.name.length > 0)
-				arr.push(obj);
+				this.arr.push(obj);
 			
-			if (this.Parsers.Class.getMessages().length > 0)
-				console.log(this.Parsers.Class.getMessages());
+			if (obj instanceof UML_Class && this.Parsers.Class.getMessages().length > 0)
+				this.out_err = this.out_err.concat(this.Parsers.Class.getMessages());
 
-			if (this.Parsers.Interface.getMessages().length > 0)
-				console.log(this.Parsers.Interface.getMessages());
+			if (obj instanceof UML_Interface && this.Parsers.Interface.getMessages().length > 0)
+				this.out_err = this.out_err.concat(this.Parsers.Interface.getMessages());
 		}
       }
 
@@ -76,10 +85,12 @@ class Parser
       console.log(ex.message);
 	  //throw ex;
     }
-    console.log("arr size: " + arr.length);
-    console.log(arr);
+    console.log("arr size: " + this.arr.length);
+    console.log(this.arr);
+    console.log("out_err size: " + this.out_err.length);
+    console.log(this.out_err);
 
-    return arr;
+    return this.arr;
   }
 }
 
@@ -189,12 +200,22 @@ class UML_ObjectParser
    checkAttrLineCorrect(str){
 	
 	let strs = this.getMethodOrAttr(str);
+	let res = true;
 	
-	return this.checkAttrNameCorrect(strs[0].trim());
+	res = this.checkAttrNameTypeCorrect(strs[0].trim());
+	
+	if (res){
+		if (strs.length == 2)
+			res = this.checkAttrNameTypeCorrect(strs[1].trim());
+		else 
+			res = false;
+	}
+	
+	return res;
 	
    }
 
-   checkAttrNameCorrect(str){
+   checkAttrNameTypeCorrect(str){
 	
 	let bname = true;
 	
@@ -425,13 +446,13 @@ class UML_ClassParser extends UML_ObjectParser
 	var res = true;
 	// (2) can only have one >>
 	res = this.checkOnlyOneExtend(str);
-	if (!res) this.err.push("Invalid inheritenance! Only one superclass allowed.");
+	if (!res) this.err.push("(" + str + ") Invalid inheritenance! Only one superclass allowed.");
 	
 	// (3) can have multiple ||	
     // (4) must be separated by a name in between
 	if (res){
 		res = this.checkMultipleImplement(str);
-		if (!res) this.err.push("Invalid association!");
+		if (!res) this.err.push("(" + str + ") Invalid association!");
 
 	}
 	// (5) >> must go first, then multiple || follows
@@ -441,7 +462,7 @@ class UML_ClassParser extends UML_ObjectParser
 	
 	if (a>0 || b>0){
 		res = (a < b);
-		if (!res) this.err.push("Invalid association! Inheritance first, then interface implementation.");
+		if (!res) this.err.push("(" + str + ") Invalid association! Inheritance first, then interface implementation.");
 	}	
 	}
 	
@@ -492,13 +513,13 @@ class UML_ClassParser extends UML_ObjectParser
 		ovis = str.trim().match(visrx);
 		if (ovis == null){
 			matched = false;
-			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
 		}
 		else{
 		  ovis = str.substr(1,str.len).match(visrx);
 		  if (ovis){
 			matched = false;
-			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
 		  }
 		}		
 	}
@@ -506,30 +527,46 @@ class UML_ClassParser extends UML_ObjectParser
 	// (2) check ':' exists
 	if (matched){
 		matched = this.checkColonCorrect(str);
-		if (!matched) this.err.push("Missing separator ':'");
+		if (!matched) this.err.push("(" + str + ") Invalid number of separator ':'");
 	}
 	// (3) name must not contain special characters except _ and $
 	if (matched){
 		if (this.isMethod(str)){
 			matched = this.checkMethodNameCorrect(str);
-			if (!matched) this.err.push("Invalid method name! Name must not contain special characters except _ and $.");
+			if (!matched) this.err.push("(" + str + ") Invalid method name! Name must not contain special characters except _ and $.");
 
 			// check attr names must not contain special characters except _ and $
 			let param;
 			let i;
 			let arrParam = this.getMethodParam(str);
+			let arrMethod;
 
 			for (i=0; i<arrParam.length; i++){
 				param = arrParam[i].trim().split(' ');
 				if (matched){
-					matched = this.checkAttrNameCorrect(param[1].trim());
-					if (!matched) this.err.push("Invalid attribute name! Name must not contain special characters except _ and $.");
+					matched = this.checkAttrNameTypeCorrect(param[0].trim());
+					if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
+					
+					if (matched && param.length == 2){
+						matched = this.checkAttrNameTypeCorrect(param[1].trim());
+						if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+					}else if (param.length > 2){
+						matched = false;
+						if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
+					}
+					
 
 				}
 			}
+			
+			// return type
+			arrParam = this.getMethodOrAttr(str);
+			matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
+			if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
 
 		}else{
 			matched = this.checkAttrLineCorrect(str);
+			if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
 		}
 	}
 	
@@ -621,7 +658,7 @@ class UML_InterfaceParser extends UML_ObjectParser
 		(2) must be separated by a name in between
 	*/
 	var res = this.checkOnlyOneExtend(str);
-	if (!res) this.err.push("Invalid inheritenance! Only one superclass allowed.");
+	if (!res) this.err.push("(" + str + ") Invalid inheritenance! Only one superclass allowed.");
 	
 	return res;
 	 
@@ -645,12 +682,12 @@ class UML_InterfaceParser extends UML_ObjectParser
 		ovis = str.trim().match(visrx);
 		if (ovis == null){
 			matched = false;
-			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
 		}else{
 		  ovis = str.substr(1,str.len).match(visrx);
 		  if (ovis){
 			matched = false;
-			if (!matched) this.err.push("Invalid modifier! Should be the first character on the line.");
+			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
 
 		  }
 		}
@@ -659,14 +696,14 @@ class UML_InterfaceParser extends UML_ObjectParser
 	// (2) check ':' exists
 	if (matched){
 		matched = this.checkColonCorrect(str);
-		if (!matched) this.err.push("Missing separator ':'");
+		if (!matched) this.err.push("(" + str + ") Invalid number of separator ':'");
 	}
 	
 	// (3) name must not contain special characters except _ and $
 	if (matched){
 		if (this.isMethod(str)){
 			matched = this.checkMethodNameCorrect(str);
-			if (!matched) this.err.push("Invalid method name! Name must not contain special characters except _ and $.");
+			if (!matched) this.err.push("(" + str + ") Invalid method name! Name must not contain special characters except _ and $.");
 
 			// check attr names must not contain special characters except _ and $
 			let param;
@@ -676,14 +713,28 @@ class UML_InterfaceParser extends UML_ObjectParser
 			for (i=0; i<arrParam.length; i++){
 				param = arrParam[i].trim().split(' ');
 				if (matched){
-					matched = this.checkAttrNameCorrect(param[1].trim());
-					if (!matched) this.err.push("Invalid attribute name! Name must not contain special characters except _ and $.");
-
+					matched = this.checkAttrNameTypeCorrect(param[0].trim());
+					if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
+					
+					if (matched && param.length == 2){
+						matched = this.checkAttrNameTypeCorrect(param[1].trim());
+						if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+					}else if (param.length > 2){
+						matched = false;
+						if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
+					}
 				}
 			}
+			// return type
+			arrParam = this.getMethodOrAttr(str);
+			matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
+			if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+
+
 
 		}else{
-			matched = this.checkAttrLineCorrect(str);
+			matched = false;
+			this.err.push("(" + str + ") This line should be a public method with correct syntax.");
 		}
 	}
 		

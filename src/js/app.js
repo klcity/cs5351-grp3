@@ -63,6 +63,8 @@ class App
         // debugger;
 
       }
+	  
+	  this.$data.errMsg = parser.getErrorMsg();
 
     } catch (ex) {
       // TODO:: Show Error Messages to users,

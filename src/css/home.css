@@ -11,4 +11,8 @@
 /* CSS Layout */
 .err-msg {
   color: red;
+  display: inline-block;
+  font-size: 20px;
+  line-height: 30px;
+  margin: 10px 0 0;
 }
