@@ -53,11 +53,11 @@ class Parser
 
           // switch parsers
           case 'class':
-            obj = this.Parsers.Class.read(reader);
+            obj = this.Parsers.Class.read(reader,this.arr);
             break;
 
           case 'interface':
-            obj = this.Parsers.Interface.read(reader);
+            obj = this.Parsers.Interface.read(reader,this.arr);
             break;
 
           // other cases
@@ -134,7 +134,7 @@ class UML_ObjectParser
 
   }
 
-  lookUpObjectByName(str){
+  lookUpObjectByName(str, arr){
 
     let i;
     for (i=0; i<arr.length; i++){
@@ -147,7 +147,7 @@ class UML_ObjectParser
 
   splitAssociationString(str){
 
-	let regex = /\>[^>]{0}\> | \|[^|]{0}\|/;
+	let regex = /\>[^>]{0}\>|\|[^|]{0}\|/;
 	let asso = null;	
 	let idx = -1;
 	let found = str.match(regex);
@@ -316,7 +316,7 @@ class UML_ObjectParser
 // -------------------------------------
 class UML_ClassParser extends UML_ObjectParser
 {
-  read(reader)
+  read(reader, arr)
   {
     // console.log( "UML_ClassParser.read()");
 
@@ -361,24 +361,31 @@ class UML_ClassParser extends UML_ObjectParser
 					
 
 					if (assoArr.length > 0){ // has interface but no super class
-						superclass = assoArr[0].substring(3,assoArr[0].length).trim();
-						assobj = this.lookUpObjectByName(superclass);
-						if (assobj)
-						{
-							obj.extends(assobj);
+						superclass = assoArr[0].substring(2,assoArr[0].length).trim();
+						if (superclass.length > 0){
+							assobj = this.lookUpObjectByName(superclass, arr);
+							if (assobj)
+							{
+								obj.extends(assobj);
+							}else{
+								this.err.push("(" + line + ") Invalid superclass! SuperClass not found.");
+							}
 						}
 					}
 					
 					for (i=1; i < assoArr.length; i++){		// Interface				
 						assoname = assoArr[i].trim();	
-						assobj = this.lookUpObjectByName(assoname);
+						assobj = this.lookUpObjectByName(assoname, arr);
 						if (assobj)
 						{
 							obj.implements(assobj);
-						}					
+						}else{
+							this.err.push("(" + line + ") Invalid association! Interface not found.");
+						}							
 					}
 				}
-			}
+			}else
+				break;
 		}else{
 
 			if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
@@ -460,7 +467,7 @@ class UML_ClassParser extends UML_ObjectParser
 	var a = str.indexOf(">>");
 	var b = str.indexOf("||");
 	
-	if (a>0 || b>0){
+	if (a>0 && b>0){
 		res = (a < b);
 		if (!res) this.err.push("(" + str + ") Invalid association! Inheritance first, then interface implementation.");
 	}	
@@ -579,7 +586,7 @@ class UML_ClassParser extends UML_ObjectParser
 // -------------------------------------
 class UML_InterfaceParser extends UML_ObjectParser
 {
-  read(reader)
+  read(reader, arr)
   {
     // console.log( "UML_InterfaceParser.read()");
     // read and create Class Object
@@ -617,14 +624,17 @@ class UML_InterfaceParser extends UML_ObjectParser
 					let assobj;
 					let superclass;
 
-					superclass = assoDef.substring(3,assoDef.length).trim();
-					assobj = this.lookUpObjectByName(superclass);
+					superclass = assoDef.substring(2,assoDef.length).trim();
+					assobj = this.lookUpObjectByName(superclass, arr);
 					if (assobj)
 					{
 						obj.extends(assobj);
+					}else{
+						this.err.push("(" + line + ") Invalid Association! Interface not found.");
 					}
 				}			
-			}
+			}else
+				break;
 		}else{
 
 			if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
