@@ -18,10 +18,21 @@ class App
       placeholder: placeholder,
       maxViewBox: {},
     };
+    /** /
+    this.data.codestr = placeholder;
+    /*/
+this.data.codestr = `class A
++attr:int
+
+class B
++attr:int`;
+     /**/
 
     this.methods = {
       input: this.input,
       resetViewbox: this.resetViewbox,
+      wheelHandle: this.wheelHandle,
+      mouseDown: this.mouseDown,
     };
 
     // note that Vue cannot get in-class methods as created/updated trigger
@@ -36,40 +47,14 @@ class App
   resetViewbox() {
     let root = document.querySelector(this.$options.el);
     let svg = root.querySelector('svg');
-    let r = svg.getBBox();
-    // Default display size is set to 800 by 800
-    // Anything smaller than 800 by 800 in width or height will by default uses the default display size
-    var oriXCenter = r.x + (r.width / 2);
-    var oriYCenter = r.y - (r.height / 2);
-    var displayPadding = 25;
-    if (r.width < 800 && r.height < 800) {
-      var newX = oriXCenter - 400
-      var newY = oriYCenter - 400
-      svg.viewBox.baseVal.x = newX;
-      svg.viewBox.baseVal.y = newY;
-      svg.viewBox.baseVal.width = 800
-      svg.viewBox.baseVal.height = 800;
-      // Store original value
-      this.maxViewBox.x = svg.viewBox.baseVal.x;
-      this.maxViewBox.y = svg.viewBox.baseVal.y;
-      this.maxViewBox.width = svg.viewBox.baseVal.width;
-      this.maxViewBox.height = svg.viewBox.baseVal.height;
-    }
-    else {
-      var maxLength = Math.max(r.width, r.height);
-      var newX = oriXCenter - (maxLength / 2) - displayPadding;
-      var newY = oriYCenter - (maxLength / 2) - displayPadding;
-      svg.viewBox.baseVal.x = newX;
-      svg.viewBox.baseVal.y = newY;
-      svg.viewBox.baseVal.width = maxLength + displayPadding * 2;
-      svg.viewBox.baseVal.height = maxLength + displayPadding * 2;
-      // Store original value
-      this.maxViewBox.x = svg.viewBox.baseVal.x;
-      this.maxViewBox.y = svg.viewBox.baseVal.y;
-      this.maxViewBox.width = svg.viewBox.baseVal.width;
-      this.maxViewBox.height = svg.viewBox.baseVal.height;
-    }
-  }
+    let sr = svg.getBBox();
+
+    svg.viewBox.baseVal.x      = sr.x - sr.width /2;
+    svg.viewBox.baseVal.y      = sr.y - sr.height/2;
+    svg.viewBox.baseVal.width  = sr.width  * 2;
+    svg.viewBox.baseVal.height = sr.height * 2;
+
+  } // end resetViewBox()
   input()
   {
     try
@@ -92,6 +77,8 @@ class App
         // debugger;
 
       }
+	  
+	  this.$data.errMsg = parser.getErrorMsg();
 
     } catch (ex) {
       // TODO:: Show Error Messages to users,
@@ -99,14 +86,65 @@ class App
       console.log('ERROR', ex);
     }
 
+  } // end input()
+
+  wheelHandle(e) {
+    let root = document.querySelector(this.$options.el);
+    let svg = root.querySelector('svg');
+
+    let rect = e.currentTarget.getBoundingClientRect();
+    let cx = (e.pageX - rect.x) / rect.width;
+    let cy = (e.pageY - rect.y) / rect.height;
+
+    let ox = svg.viewBox.baseVal.x;
+    let oy = svg.viewBox.baseVal.y;
+    let ow = svg.viewBox.baseVal.width;
+    let oh = svg.viewBox.baseVal.height;
+
+    let nw = e.deltaY > 0 ? ow * 1.1 : ow / 1.1;
+    let nh = e.deltaY > 0 ? oh * 1.1 : oh / 1.1;
+    let nx = (ow - nw) * cx + ox;
+    let ny = (oh - nh) * cy + oy;
+
+    svg.viewBox.baseVal.x      = nx;
+    svg.viewBox.baseVal.y      = ny;
+    svg.viewBox.baseVal.width  = nw;
+    svg.viewBox.baseVal.height = nh;
+
+  }
+  mouseDown(e) {
+    let root = document.querySelector(this.$options.el);
+    let svg = root.querySelector('svg');
+
+    let pt = svg.createSVGPoint();
+    let ctm = svg.getScreenCTM();
+    pt.x = e.pageX;
+    pt.y = e.pageY;
+
+    let op = pt.matrixTransform(ctm);
+    let oSvgVbx = svg.viewBox.baseVal.x + op.x;
+    let oSvgVby = svg.viewBox.baseVal.y + op.y;
+
+    console.log(pt, op);
+
+    function _move(e) {
+      pt.x = e.pageX;
+      pt.y = e.pageY;
+      let dp = pt.matrixTransform(ctm);
+      svg.viewBox.baseVal.x = oSvgVbx - dp.x;
+      svg.viewBox.baseVal.y = oSvgVby - dp.y;
+    }
+    window.addEventListener('mousemove', _move);
+    window.addEventListener('mouseup', (e) => {
+      window.removeEventListener('mousemove', _move);
+    }, { once: true });
+
   }
 
 }
 
-
 let app = new App();
 let vue = new Vue(app);
-
 
 // UI View functions
 function svgMove(dx, dy) {

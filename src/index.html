@@ -23,87 +23,95 @@
   </div>
 
   <form onsubmit="return false" id="app">
+    <!-- HEADER -->
+    <header>
+      <span>UML Diagram Generator [CS5351 - Group 3]</span>
+    </header>
 
-    <div class="container">
-      <div class="left">
-        <div class="sub-titles">
-          <h4>Input your script:</h4>
-
-          <section id="sec-input">
-            <button type="reset">Clear All</button>
-            <div class="txt">
-              <textarea rows="10" cols="50" v-model="codestr" @input="input()" :placeholder="placeholder"></textarea>
-            </div>
-          </section>
+    <!-- Content -->
+    <main class="container">
+      <section id="sec-input" class="left">
+        <!-- input area -->
+        <h4>Input your script:</h4>
+        <div id="f-txt" class="frame-layout">
+          <textarea v-model="codestr" @input="input()"
+                    :placeholder="placeholder"></textarea>
+          <button class="btn-clear" type="reset"></button>
         </div>
-        <div class="sub-titles">
-          <h4>Error Message:</h4>
-        </div>
+        <!-- error message -->
+        <h4>Error Message:</h4>
         <div class="err-msg">
           {{ errMsg }}
         </div>
-      </div>
+      </section>
 
-      <div class="right">
-        <!-- <section id="sec-output"> -->
+      <section id="sec-output" class="right">
         <span v-if="!graph.length">
           No Graph
         </span>
-        <svg v-else viewBox="-1200 -100 2500 1500">
+        <svg v-else viewBox="0 0 1 1"
+             @mousewheel="wheelHandle($event)"
+             @mousedown="mouseDown($event)">
           <g>
             <g v-for="r in graph">
               <rect class="cls-box" style="fill:white;stroke-width:1;stroke:black;" :x="r.X" :y="r.Y" :width="r.w"
                 :height="r.h"></rect>
               <g>
-                <text class="cls-name" :x="r.X + 10" :y="r.Y + 20">{{ r.name }}</text>
+                <text class="cls-name"
+                      :x="r.X + 10" :y="r.Y + 20">{{ r.name }}</text>
               </g>
-              <line class="cls-line" stroke="black" :x1="r.X" :y1="r.ClassNameSeparatorY" :x2="r.X + r.w"
-                :y2="r.ClassNameSeparatorY" />
+              <line class="cls-line" stroke="black"
+                    :x1="r.X" :y1="r.ClassNameSeparatorY"
+                    :x2="r.X + r.w" :y2="r.ClassNameSeparatorY" />
 
               <g>
-                <text v-for="(d, idx) in r.attrs" :x="r.X + 10" :y="r.Y + 30 + (idx + 1) * 20">
+                <text v-for="(d, idx) in r.attrs"
+                      :x="r.X + 10" :y="r.Y + 30 + (idx + 1) * 20">
                   {{ d }}</text>
 
               </g>
-              <line class="cls-line a22" stroke="black" :x1="r.X" :y1="r.AttributesSeparatorY" :x2="r.X + r.w"
-                :y2="r.AttributesSeparatorY" />
+              <line class="cls-line a22" stroke="black"
+                    :x1="r.X" :y1="r.AttributesSeparatorY"
+                    :x2="r.X + r.w" :y2="r.AttributesSeparatorY" />
 
               <g>
-                <text v-for="(d, idx) in r.methods" :x="r.X + 10"
-                  :y="(r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30) + (idx + 1) * 20">
+                <text v-for="(d, idx) in r.methods"
+                      :x="r.X + 10" :y="(r.Y + (r.attrs.length + (r.attrs.length - 1)) * 10 + 20 + 30) + (idx + 1) * 20">
                   {{ d }}</text>
               </g>
 
-              <line v-if="r.parent" class="assc" :x1="r.x" :y1="r.Y" :x2="r.parent.x" :y2="r.parent.Y + r.parent.h">
-              </line>
-            </g>
-
+            <line v-if="r.parent" class="assc"
+                  :x1="r.x" :y1="r.Y"
+                  :x2="r.parent.x" :y2="r.parent.Y + r.parent.h"></line>
           </g>
-        </svg>
+    
+        </g>
+      </svg>
 
-        <!-- </section> -->
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer>
+      <div>
+        <span>Zoom </span>
+        <button onclick="svgZoomIn()">In</button>
+        <button onclick="svgZoomOut()">Out</button>
       </div>
-    </div>
+      <div>
+        <span>Move </span>
+        <button onclick="svgMove( 0, -10)">Up</button>
+        <button onclick="svgMove( 0,  10)">Down</button>
+        <button onclick="svgMove(-10,  0)">Left</button>
+        <button onclick="svgMove( 10,  0)">Right</button>
+      </div>
+      <div>
+        <button type="reset">Reset</button>
+        <button onclick="downloadPNG()">Export PNG</button>
+      </div>
+    </footer>
   </form>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    Zoom:
-    <button onclick="svgZoomIn()">In</button>
-    <button onclick="svgZoomOut()">Out</button>
-    | Screen:
-    <button onclick="svgMove(0, -10)">Up</button>
-    <button onclick="svgMove(0, 10)">Down</button>
-    <button onclick="svgMove(-10, 0)">Left</button>
-    <button onclick="svgMove(10, 0)">Right</button>
-    | View:
-    <button onclick="svgReset()">Reset</button>
-    | Download:
-    <button onclick="downloadPNG()">PNG File</button>
-  </div>
-
-  <!-- CANVAS -->
-  <canvas id="draftCanvas" hidden></canvas>
+  <span id="copyright">Developed by CS5351/1920A - Group 3, &copy; 2019</span>
 
 </body>
 </html>
