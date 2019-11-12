@@ -44,7 +44,9 @@
         <span v-if="!graph.length">
           No Graph
         </span>
-        <svg v-else viewBox="-1200 -100 2500 1500">
+        <svg v-else viewBox="0 0 1 1"
+             @mousewheel="wheelHandle($event)"
+             @mousedown="mouseDown($event)">
           <g>
             <g v-for="r in graph">
               <rect class="cls-box" style="fill:white;stroke-width:1;stroke:black;" :x="r.X" :y="r.Y" :width="r.w"
