@@ -254,6 +254,46 @@ class UML_ObjectParser
 	
   }    
 
+   checkObjectNameCorrect(str){
+	
+	let bname = true;
+	
+	let namerx = /[^A-Za-z0-9_$]/;
+	let oname;
+	
+	let s = str.trim();
+	
+	if (s.length > 0){
+		oname = s.match(namerx);
+		if (oname){
+			bname = false;
+		}
+	}
+	return bname;
+	
+  }   
+ 
+  validateObjectName(line, str, arr){
+	
+	var res = true;
+	var assobj;
+	 
+	res = this.checkObjectNameCorrect(str);
+	if (!res) this.err.push("(" + line + ") Invalid object name! Name must not contain special characters except _ and $.");
+
+    if (res){
+		if (str.length > 0){
+			assobj = this.lookUpObjectByName(str, arr);
+			if (assobj)				
+			{	
+				res = false;
+				this.err.push("(" + line + ") Duplicate object found!");
+			}
+		}
+	}
+	return res;
+  } 
+ 
   isMethod(str){
 	
 	let bmethod = false;
@@ -346,8 +386,12 @@ class UML_ClassParser extends UML_ObjectParser
 				
 				let strpart = classDef.split(" ");
 				if (strpart.length > 1){ // set class name			
-					obj.name = strpart[1].trim();
-					headerline = false;
+					
+					if (this.validateObjectName(line, strpart[1].trim(), arr)){
+						obj.name = strpart[1].trim();
+						headerline = false;
+					}
+					else break;
 				}
 
 				if (assoDef.length > 0){
@@ -614,10 +658,13 @@ class UML_InterfaceParser extends UML_ObjectParser
 				
 				let strpart = classDef.split(" ");
 				if (strpart.length > 1){ // set interface name			
-					obj.name = strpart[1].trim();
-					headerline = false;
+					if (this.validateObjectName(line, strpart[1].trim(), arr)){
+						obj.name = strpart[1].trim();					
+						headerline = false;
+					}
+					else break;
 				}
-				
+								
 				if (assoDef.length > 0){
 					
 					let assoname;	
@@ -754,23 +801,4 @@ class UML_InterfaceParser extends UML_ObjectParser
    return matched;
 //   return true;
   }  
-}
-
-function myFunction() {
-  var x = document.getElementById("txt-syntax");
-
-  document.getElementById("sec-output").innerHTML = x.value;
-  //var obj = new UML_InterfaceParser();
-  //var abc = obj.validateAssociationLine("interface Professor >> Person  ");
-  var obj = new UML_ClassParser();
-  var abc = obj.validateAssociationLine("class Professor >> Person ||ILicenseTest|| IExpatriate ");
-  if (abc == Boolean('true'))
-	window.alert("True")
-	else
-	window.alert("False");
-}
-
-function clearFunction() {
-	document.getElementById("txt-syntax").value = "";
-	document.getElementById("sec-output").innerHTML = "";
 }
