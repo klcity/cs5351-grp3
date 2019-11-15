@@ -71,6 +71,38 @@ class GObj
          + C.AttributeLineHeight / 2;
   }
 
+  get ParentDrawPath()
+  {
+    const R = 10;                    // arrow size
+    const deg30 = Math.PI / 6;      // half triangle theta
+    const ml = R * Math.cos(deg30); // triangle height
+
+    let ox = this.x, oy = this.Y;
+    let px = this.parent.x;
+    let py = this.parent.Y + this.parent.h;
+    let lx=px, ly=py;
+    let rx=px, ry=py;
+    let mx=px, my=py;
+    
+    let theta = Math.atan2(oy-py, ox-px);
+    lx += Math.cos(theta + deg30) * R;
+    ly += Math.sin(theta + deg30) * R;
+    rx += Math.cos(theta - deg30) * R;
+    ry += Math.sin(theta - deg30) * R;
+
+    mx += Math.cos(theta) * ml;
+    my += Math.sin(theta) * ml;
+
+    return `
+    M${ox},${oy}
+    L${mx},${my}
+    L${lx},${ly}
+    L${px},${py}
+    L${rx},${ry}
+    L${mx},${my}
+    `.replace(/\s+/g, ' ');
+  }
+
 }
 
 class UML_Object

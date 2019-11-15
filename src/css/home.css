@@ -128,7 +128,8 @@ svg {
   fill: none;
 }
 .assc {
-  stroke: red;
+  fill: white;
+  stroke: black;
   stroke-width: 1;
 }
 

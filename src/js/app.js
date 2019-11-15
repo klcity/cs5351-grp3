@@ -18,15 +18,6 @@ class App
       placeholder: placeholder,
       maxViewBox: {},
     };
-    /** /
-    this.data.codestr = placeholder;
-    /*/
-this.data.codestr = `class A
-+attr:int
-
-class B
-+attr:int`;
-     /**/
 
     this.methods = {
       input: this.input,
@@ -78,13 +69,14 @@ class B
 
       }
 	  
-	  this.$data.errMsg = parser.getErrorMsg();
-
     } catch (ex) {
       // TODO:: Show Error Messages to users,
       // tell them what is wrong in their syntax
       console.log('ERROR', ex);
+    } finally {
+      this.$data.errMsg = parser.getErrorMsg();
     }
+
 
   } // end input()
 
