@@ -1,4 +1,6 @@
 let C = {
+  BOX_PADX: 10,
+  BOX_PADY: 20,
   PAD: 50,
   ClassNameHeight: 30,
   AttributeLineHeight: 20,

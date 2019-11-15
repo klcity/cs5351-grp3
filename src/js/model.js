@@ -40,12 +40,12 @@ class GObj
     // Set box width
     let canvas = document.createElement('canvas');
     let context = canvas.getContext('2d');
-    context.font = '20px san-serif';
+    context.font = '12px san-serif';
 
     let maxWordLength = -1;
 
     this.attrs.forEach(s => {
-      let rect = context.measureText(s);
+      let rect = context.measureText(s.toString());
       maxWordLength = Math.max(maxWordLength, rect.width);
     });
     this.methods.forEach(s => {
@@ -57,7 +57,7 @@ class GObj
       context.measureText(base.name).width
     );
 
-    this.w = maxWordLength;
+    this.w = maxWordLength + 2*C.BOX_PADX;
   }
   get X() { return this.x - this.w/2; }
   get Y() { return this.y - this.h/2; }
@@ -73,23 +73,22 @@ class GObj
 
   get ParentDrawPath()
   {
-    const R = 10;                    // arrow size
+    const R = 10;                   // arrow size
     const deg30 = Math.PI / 6;      // half triangle theta
     const ml = R * Math.cos(deg30); // triangle height
 
     let ox = this.x, oy = this.Y;
     let px = this.parent.x;
     let py = this.parent.Y + this.parent.h;
-    let lx=px, ly=py;
-    let rx=px, ry=py;
-    let mx=px, my=py;
+    let lx=px, ly=py; // left point of triangle
+    let rx=px, ry=py; // right point of triangle
+    let mx=px, my=py; // mid-point of triangle
     
     let theta = Math.atan2(oy-py, ox-px);
     lx += Math.cos(theta + deg30) * R;
     ly += Math.sin(theta + deg30) * R;
     rx += Math.cos(theta - deg30) * R;
     ry += Math.sin(theta - deg30) * R;
-
     mx += Math.cos(theta) * ml;
     my += Math.sin(theta) * ml;
 

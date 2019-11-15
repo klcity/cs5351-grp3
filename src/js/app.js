@@ -48,9 +48,9 @@ class App
   } // end resetViewBox()
   input()
   {
+    let parser = new Parser();
     try
     {
-      let parser = new Parser();
       let model = parser.parse(this.codestr);
 
       if (model.length > 0) {
@@ -59,8 +59,6 @@ class App
         let graph = drawer.generateGraph(model);
 
         this.$data.graph = graph;
-        // console.log(graph);
-        // window.g= graph;
 
       } else {
 
@@ -84,20 +82,24 @@ class App
     let root = document.querySelector(this.$options.el);
     let svg = root.querySelector('svg');
 
+    // get mouse position ratio
     let rect = e.currentTarget.getBoundingClientRect();
     let cx = (e.pageX - rect.x) / rect.width;
     let cy = (e.pageY - rect.y) / rect.height;
 
+    // get original SVG coordination system viewbox
     let ox = svg.viewBox.baseVal.x;
     let oy = svg.viewBox.baseVal.y;
     let ow = svg.viewBox.baseVal.width;
     let oh = svg.viewBox.baseVal.height;
 
+    // compute new viewbox size and top-left location
     let nw = e.deltaY > 0 ? ow * 1.1 : ow / 1.1;
     let nh = e.deltaY > 0 ? oh * 1.1 : oh / 1.1;
-    let nx = (ow - nw) * cx + ox;
+    let nx = (ow - nw) * cx + ox; // change of x,y location = change in size * ratio of mouse pointer
     let ny = (oh - nh) * cy + oy;
 
+    // update viewport
     svg.viewBox.baseVal.x      = nx;
     svg.viewBox.baseVal.y      = ny;
     svg.viewBox.baseVal.width  = nw;
@@ -105,28 +107,36 @@ class App
 
   }
   mouseDown(e) {
+    // find SVG element
     let root = document.querySelector(this.$options.el);
     let svg = root.querySelector('svg');
 
+    // use SVG point and CTM (Current Transformation Matrix)
     let pt = svg.createSVGPoint();
     let ctm = svg.getScreenCTM();
     pt.x = e.pageX;
     pt.y = e.pageY;
 
+    // transform the cursor point to SVG point
     let op = pt.matrixTransform(ctm);
+    
+    // save starting point + viewbox starting point (optimized)
     let oSvgVbx = svg.viewBox.baseVal.x + op.x;
     let oSvgVby = svg.viewBox.baseVal.y + op.y;
-
-    console.log(pt, op);
 
     function _move(e) {
       pt.x = e.pageX;
       pt.y = e.pageY;
+      // transform currsor point to SVG point
       let dp = pt.matrixTransform(ctm);
-      svg.viewBox.baseVal.x = oSvgVbx - dp.x;
+      svg.viewBox.baseVal.x = oSvgVbx - dp.x; // (optimized)
       svg.viewBox.baseVal.y = oSvgVby - dp.y;
     }
+
+    // register moving updates
     window.addEventListener('mousemove', _move);
+
+    // register end of drag
     window.addEventListener('mouseup', (e) => {
       window.removeEventListener('mousemove', _move);
     }, { once: true });
@@ -169,34 +179,32 @@ function svgReset() {
 
 // Download PNG function
 function downloadPNG(){
-  var svgPNG = null;
-  svgPNG = document.querySelector('svg');
-  var widthValue = svgPNG.getBoundingClientRect().width;
-  var heightValue = svgPNG.getBoundingClientRect().height;
-  var draftCanvas = document.getElementById('draftCanvas');
-  svgPNG.setAttribute('width', widthValue);
-  svgPNG.setAttribute('height', heightValue);
-  draftCanvas.width = widthValue;
-  draftCanvas.height = heightValue;
-  var data = new XMLSerializer().serializeToString(svgPNG);
-  var win = window.URL || window.webkitURL || window;
-  var img = new Image();
-  var blob = new Blob([data], {
-      type: 'image/svg+xml'
-  });
-  var url = win.createObjectURL(blob);
+  let svg = document.querySelector('svg');
+  let rect = svg.getBoundingClientRect();
+  var cvs = document.creaetElement('canvas');
+  svg.setAttribute('width', rect.width);
+  svg.setAttribute('height', rect.height);
+  cvs.width = rect.width;
+  cvs.height = rect.height;
+  let data = new XMLSerializer().serializeToString(svg);
+  let win = window.URL || window.webkitURL || window;
+  let img = new Image();
+  let blob = new Blob([data], { type: 'image/svg+xml' });
+  let url = win.createObjectURL(blob);
   img.onload = function() {
-      draftCanvas.getContext('2d').drawImage(img, 0, 0);
-      win.revokeObjectURL(url);
-      var uri = draftCanvas.toDataURL('image/png').replace('image/png', 'octet/stream');
-      var a = document.createElement('a');
-      document.body.appendChild(a);
-      a.style = 'display: none';
-      a.href = uri
-      a.download = (svgPNG.id || svgPNG.getAttribute('name') || svgPNG.getAttribute('aria-label') || 'untitled') + '.png';
-      a.click();
-      window.URL.revokeObjectURL(uri);
-      document.body.removeChild(a);
+    // draw image
+    cvs.getContext('2d').drawImage(img, 0, 0);
+    // create fake button
+    let a = document.createElement('a');
+    a.style = 'display: none';
+    a.href = cvs.toDataURL('image/png');
+    a.download = 'Class Diagram.png';
+    // impersonate click
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // release objects
+    win.revokeObjectURL(url);
   };
   img.src = url;
 }

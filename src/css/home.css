@@ -124,6 +124,9 @@ svg {
   cursor: default;
   user-select: none;
 }
+svg text {
+  font: 12px sans-serif;
+}
 .cls-box {
   fill: none;
 }
