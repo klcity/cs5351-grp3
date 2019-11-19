@@ -42,8 +42,6 @@ class Drawer
       i.y = o.y + C.PAD + (i.h + o.h)/2;
       curX += this.estimateWidth(i) + C.PAD;
     });
-
-    
   
     items.forEach(i => {
       if (i.children) this.assignCoord(i.children, i);

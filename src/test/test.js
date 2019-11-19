@@ -294,9 +294,9 @@ new Vue({
     resetViewbox: function() {
       let root = document.querySelector(this.$options.el);
       let svg = root.querySelector('svg');
+      if (!svg) return;
       let r = svg.getBBox();
       svg.viewBox = `${r.x} ${r.y} ${r.width} ${r.height}`;
-      debugger;
     }
   },
   created: function() {

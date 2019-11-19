@@ -130,10 +130,18 @@ svg text {
 .cls-box {
   fill: none;
 }
-.assc {
+.assc.inhr {
   fill: white;
   stroke: black;
   stroke-width: 1;
+}
+.assc.impl .arrow {
+  fill: white;
+  stroke: black;
+}
+.assc.impl .tail {
+  stroke: black;
+  stroke-dasharray: 3 3;
 }
 
 /* Footer Section Layout*/
