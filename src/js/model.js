@@ -165,6 +165,70 @@ class GObj
 
     return o;
   }
+
+    // ---- end selection
+
+    let o = {
+      o: vf,
+      p: vt,
+      l: vt.clone(), // left point of triangle
+      r: vt.clone(), // right point of triangle
+      m: vt.clone(), // mid-point of triangle
+    };
+
+    let theta = o.o.sub(o.p).atan2();
+
+    o.l = o.l.add( Vec2D.rotate(R,  theta + deg30) );
+    o.r = o.r.add( Vec2D.rotate(R,  theta - deg30) );
+    o.m = o.m.add( Vec2D.rotate(ml, theta) );
+
+    return o;
+  }
+}
+class Vec2D
+{
+  constructor(x, y) {
+    this.x = x||0;
+    this.y = y||0;
+  }
+  static rotate(length, theta) {
+    return new Vec2D(
+      Math.cos(theta) * length,
+      Math.sin(theta) * length
+    );
+  }
+  clone(v) {
+    return new Vec2D(this.x, this.y);
+  }
+  neg() {
+    return new Vec2D(-this.x, -this.y);
+  }
+  add(v, y) {
+    let p = this.clone();
+    if (v instanceof Vec2D) {
+      p.x += v.x;
+      p.y += v.y;
+    } else if (v instanceof Number) {
+      p.x += v;
+      p.y += y||0;
+    }
+    return p;
+  }
+  sub(v, y) {
+    if (v instanceof Vec2D) {
+      return this.add(v.neg());
+    } else if (v instanceof Number) {
+      return this.add(-v, -y);
+    }
+    return this.clone();
+  }
+  atan2() {
+    return Math.atan2(this.y, this.x);
+  }
+  toString() {
+    return `${this.x},${this.y}`;
+  }
+  
 }
 class Vec2D
 {
