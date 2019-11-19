@@ -132,14 +132,14 @@ class GObj
 
     // to
     let face2 = (Math.round(2*(phi2 - alpha) / Math.PI) + 4) % 4;
-    switch (face1) {
+    switch (face2) {
       case 0:
         vt = new Vec2D(p.x + p.w/2, p.y); break;
-      case 1:
+      case 3:
         vt = new Vec2D(p.x, p.y + p.h/2); break;
       case 2:
         vt = new Vec2D(p.x - p.w/2, p.y); break;
-      case 3:
+      case 1:
         vt = new Vec2D(p.x, p.y - p.h/2); break;
     }
 
