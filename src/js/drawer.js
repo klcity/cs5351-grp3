@@ -1,8 +1,8 @@
 let C = {
-  BOX_PADX: 10,
+  BOX_PADX: 25,
   BOX_PADY: 20,
   PAD: 50,
-  ClassNameHeight: 30,
+  ClassNameHeight: 20,
   AttributeLineHeight: 20,
   MethodLineHeight: 20,
 };
@@ -43,8 +43,6 @@ class Drawer
       curX += this.estimateWidth(i) + C.PAD;
     });
 
-    
-  
     items.forEach(i => {
       if (i.children) this.assignCoord(i.children, i);
     });

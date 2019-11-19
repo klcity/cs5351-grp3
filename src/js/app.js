@@ -181,7 +181,7 @@ function svgReset() {
 function downloadPNG(){
   let svg = document.querySelector('svg');
   let rect = svg.getBoundingClientRect();
-  var cvs = document.creaetElement('canvas');
+  var cvs = document.createElement('canvas');
   svg.setAttribute('width', rect.width);
   svg.setAttribute('height', rect.height);
   cvs.width = rect.width;

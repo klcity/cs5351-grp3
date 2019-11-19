@@ -22,18 +22,30 @@ class GObj
 
   }
   //---- Adaptor Pattern
-  get name()    { return this.base.name; }
+  get interfaces()  { return this.base.interfaces; }
+  get IsInterfaces() { return this.interfaces == null; }
+  get dashLine() {
+    if (this.IsInterfaces) return 10;
+    return 0;
+  }
+
+  get name()  { 
+    if (this.IsInterfaces) return ["<< Interface >>", this.base.name];
+    return [this.base.name];
+  }
   get parent()  {
     if (!this.base.parent) return null;
     return GObj.__dict__[this.base.parent.name]
         || new GObj(this.base.parent);
   }
+
   //--
 
   init(base)
   {
     // Set box height
-    this.h = 30 + (this.attrs.length + (this.attrs.length - 1))     * 10
+    this.h = (this.name.length + (this.name.length - 1))            * 10
+           + 20 + (this.attrs.length + (this.attrs.length - 1))     * 10
            + 20 + (this.methods.length + (this.methods.length - 1)) * 10
            + 20;
 
@@ -63,13 +75,17 @@ class GObj
   get Y() { return this.y - this.h/2; }
 
   get ClassNameSeparatorY() {
-    return this.Y + C.ClassNameHeight;
+    return this.Y 
+         + this.name.length * C.ClassNameHeight
+         + C.ClassNameHeight / 2;
   }
   get AttributesSeparatorY() {
     return this.ClassNameSeparatorY
          + this.attrs.length * C.AttributeLineHeight
          + C.AttributeLineHeight / 2;
   }
+
+
 
   get ParentDrawPath()
   {
@@ -92,9 +108,61 @@ class GObj
     mx += Math.cos(theta) * ml;
     my += Math.sin(theta) * ml;
 
+    // return `
+    // M${ox},${oy}
+    // L${mx},${my}
+    // L${lx},${ly}
+    // L${px},${py}
+    // L${rx},${ry}
+    // L${mx},${my}
+    // `.replace(/\s+/g, ' ');
+
     return `
-    M${ox},${oy}
+    M${mx},${my}
+    L${lx},${ly}
+    L${px},${py}
+    L${rx},${ry}
     L${mx},${my}
+    `.replace(/\s+/g, ' ');
+  }
+
+  get InterfaceDrawPath()
+  {
+    const R = 10;                   // arrow size
+    const deg30 = Math.PI / 6;      // half triangle theta
+    const ml = R * Math.cos(deg30); // triangle height
+
+    // let ox = this.x, oy = this.Y;
+    // let px = this.parent.x;
+    // let py = this.parent.Y + this.parent.h;
+
+    let ox = this.parent.x, oy = this.parent.Y + this.parent.h;
+    let px = this.x;
+    let py = this.Y;
+
+    let lx=px, ly=py; // left point of triangle
+    let rx=px, ry=py; // right point of triangle
+    let mx=px, my=py; // mid-point of triangle
+    
+    let theta = Math.atan2(oy-py, ox-px);
+    lx += Math.cos(theta + deg30) * R;
+    ly += Math.sin(theta + deg30) * R;
+    rx += Math.cos(theta - deg30) * R;
+    ry += Math.sin(theta - deg30) * R;
+    mx += Math.cos(theta) * ml;
+    my += Math.sin(theta) * ml;
+
+    // return `
+    // M${ox},${oy}
+    // L${mx},${my}
+    // L${lx},${ly}
+    // L${px},${py}
+    // L${rx},${ry}
+    // L${mx},${my}
+    // `.replace(/\s+/g, ' ');
+
+    return `
+    M${mx},${my}
     L${lx},${ly}
     L${px},${py}
     L${rx},${ry}
