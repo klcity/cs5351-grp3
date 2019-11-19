@@ -22,7 +22,12 @@ class GObj
 
   }
   //---- Adaptor Pattern
-  get name()   { return this.base.name; }
+  get interfaces()  { return this.base.interfaces; }
+  get IsInterfaces() { return this.interfaces == null; }
+  get name()  { 
+    if (this.IsInterfaces) return ["<< Interface >>", this.base.name];
+    return [this.base.name];
+  }  
   get parent() {
     if (!this.base.parent) return null;
     return GObj.__dict__[this.base.parent.name]
@@ -43,7 +48,8 @@ class GObj
   init(base)
   {
     // Set box height
-    this.h = 30 + 10 * (this.attrs.length + (this.attrs.length - 1))
+    this.h =      10 *(this.name.length + (this.name.length - 1))
+           + 20 + 10 * (this.attrs.length + (this.attrs.length - 1))
            + 20 + 10 * (this.methods.length + (this.methods.length - 1))
            + 20;
 
@@ -62,10 +68,10 @@ class GObj
       let rect = context.measureText(s);
       maxWordLength = Math.max(maxWordLength, rect.width);
     });
-    maxWordLength = Math.max(
-      maxWordLength,
-      context.measureText(base.name).width
-    );
+    this.name.forEach(s => {
+      let rect = context.measureText(s);
+      maxWordLength = Math.max(maxWordLength, rect.width);
+    });
 
     this.w = maxWordLength + 2*C.BOX_PADX;
   }
@@ -166,69 +172,6 @@ class GObj
     return o;
   }
 
-    // ---- end selection
-
-    let o = {
-      o: vf,
-      p: vt,
-      l: vt.clone(), // left point of triangle
-      r: vt.clone(), // right point of triangle
-      m: vt.clone(), // mid-point of triangle
-    };
-
-    let theta = o.o.sub(o.p).atan2();
-
-    o.l = o.l.add( Vec2D.rotate(R,  theta + deg30) );
-    o.r = o.r.add( Vec2D.rotate(R,  theta - deg30) );
-    o.m = o.m.add( Vec2D.rotate(ml, theta) );
-
-    return o;
-  }
-}
-class Vec2D
-{
-  constructor(x, y) {
-    this.x = x||0;
-    this.y = y||0;
-  }
-  static rotate(length, theta) {
-    return new Vec2D(
-      Math.cos(theta) * length,
-      Math.sin(theta) * length
-    );
-  }
-  clone(v) {
-    return new Vec2D(this.x, this.y);
-  }
-  neg() {
-    return new Vec2D(-this.x, -this.y);
-  }
-  add(v, y) {
-    let p = this.clone();
-    if (v instanceof Vec2D) {
-      p.x += v.x;
-      p.y += v.y;
-    } else if (v instanceof Number) {
-      p.x += v;
-      p.y += y||0;
-    }
-    return p;
-  }
-  sub(v, y) {
-    if (v instanceof Vec2D) {
-      return this.add(v.neg());
-    } else if (v instanceof Number) {
-      return this.add(-v, -y);
-    }
-    return this.clone();
-  }
-  atan2() {
-    return Math.atan2(this.y, this.x);
-  }
-  toString() {
-    return `${this.x},${this.y}`;
-  }
-  
 }
 class Vec2D
 {
