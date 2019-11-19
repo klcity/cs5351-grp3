@@ -174,6 +174,14 @@ function svgReset() {
   svg.viewBox.baseVal.height = s.height;
 }
 
+// Print and IMage function
+function imgPrint() {
+  window.print();
+}
+
+function imgEmail() {
+
+}
 
 // Download PNG function
 function downloadPNG(){
