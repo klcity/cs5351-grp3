@@ -10,8 +10,8 @@ class GObj
 
     if (base)
     {
-      this.base = base;
-      this.attrs   = Object.keys(base.attrs  ).map(k => base.attrs[k]);
+      this.base    = base;
+      this.attrs   = Object.keys(base.attrs  ).map(k => base.attrs  [k]);
       this.methods = Object.keys(base.methods).map(k => base.methods[k]);
       this.init(base);
       GObj.__dict__[base.name] = this;
@@ -22,31 +22,29 @@ class GObj
 
   }
   //---- Adaptor Pattern
-  get interfaces()  { return this.base.interfaces; }
-  get IsInterfaces() { return this.interfaces == null; }
-  get dashLine() {
-    if (this.IsInterfaces) return 10;
-    return 0;
-  }
-
-  get name()  { 
-    if (this.IsInterfaces) return ["<< Interface >>", this.base.name];
-    return [this.base.name];
-  }
-  get parent()  {
+  get name()   { return this.base.name; }
+  get parent() {
     if (!this.base.parent) return null;
     return GObj.__dict__[this.base.parent.name]
         || new GObj(this.base.parent);
   }
-
+  get interfaces() {
+    if (!this._intf)
+    {
+      if (!this.base.interfaces) return null;
+      this._intf = this.base.interfaces.map(i =>
+        GObj.__dict__[i.name] || new GObj(i)
+      );
+    }
+    return this._intf;
+  }
   //--
 
   init(base)
   {
     // Set box height
-    this.h = (this.name.length + (this.name.length - 1))            * 10
-           + 20 + (this.attrs.length + (this.attrs.length - 1))     * 10
-           + 20 + (this.methods.length + (this.methods.length - 1)) * 10
+    this.h = 30 + 10 * (this.attrs.length + (this.attrs.length - 1))
+           + 20 + 10 * (this.methods.length + (this.methods.length - 1))
            + 20;
 
     // Set box width
@@ -89,87 +87,129 @@ class GObj
 
   get ParentDrawPath()
   {
-    const R = 10;                   // arrow size
-    const deg30 = Math.PI / 6;      // half triangle theta
-    const ml = R * Math.cos(deg30); // triangle height
-
-    let ox = this.x, oy = this.Y;
-    let px = this.parent.x;
-    let py = this.parent.Y + this.parent.h;
-    let lx=px, ly=py; // left point of triangle
-    let rx=px, ry=py; // right point of triangle
-    let mx=px, my=py; // mid-point of triangle
-    
-    let theta = Math.atan2(oy-py, ox-px);
-    lx += Math.cos(theta + deg30) * R;
-    ly += Math.sin(theta + deg30) * R;
-    rx += Math.cos(theta - deg30) * R;
-    ry += Math.sin(theta - deg30) * R;
-    mx += Math.cos(theta) * ml;
-    my += Math.sin(theta) * ml;
-
-    // return `
-    // M${ox},${oy}
-    // L${mx},${my}
-    // L${lx},${ly}
-    // L${px},${py}
-    // L${rx},${ry}
-    // L${mx},${my}
-    // `.replace(/\s+/g, ' ');
-
+    let p = this.getArrowPoints(this.parent);
     return `
-    M${mx},${my}
-    L${lx},${ly}
-    L${px},${py}
-    L${rx},${ry}
-    L${mx},${my}
-    `.replace(/\s+/g, ' ');
+    M${p.o}
+    L${p.m}
+    L${p.l}
+    L${p.p}
+    L${p.r}
+    L${p.m}`.replace(/\s+/g, '');
+  }
+  InterfaceDrawPathTail(i)
+  {
+    let p = this.getArrowPoints(i);
+    return `M${p.o}L${p.m}`;
+  }
+  InterfaceDrawPathArrow(i)
+  {
+    let p = this.getArrowPoints(i);
+    return `M${p.l}L${p.r}L${p.p}Z`;
   }
 
-  get InterfaceDrawPath()
+  getArrowPoints(p)
   {
     const R = 10;                   // arrow size
     const deg30 = Math.PI / 6;      // half triangle theta
     const ml = R * Math.cos(deg30); // triangle height
 
-    // let ox = this.x, oy = this.Y;
-    // let px = this.parent.x;
-    // let py = this.parent.Y + this.parent.h;
+    // points of arrow head and tail
+    let vf, vt;
 
-    let ox = this.parent.x, oy = this.parent.Y + this.parent.h;
-    let px = this.x;
-    let py = this.Y;
+    // direction of the 2 boxes
+    let alpha = Math.atan2(this.y - p.y, this.x - p.x);
+    let phi1  = Math.tan(this.w / this.h);
+    let phi2  = Math.tan(p.w / p.h);
+    // ---- select point, by face
+    // from
+    let face1 = (Math.round(2*(alpha - phi1) / Math.PI) + 4) % 4;
+    switch (face1) {
+      case 2:
+        vf = new Vec2D(this.x + this.w/2, this.y); break;
+      case 3:
+        vf = new Vec2D(this.x, this.y + this.h/2); break;
+      case 0:
+        vf = new Vec2D(this.x - this.w/2, this.y); break;
+      case 1:
+        vf = new Vec2D(this.x, this.y - this.h/2); break;
+    }
 
-    let lx=px, ly=py; // left point of triangle
-    let rx=px, ry=py; // right point of triangle
-    let mx=px, my=py; // mid-point of triangle
-    
-    let theta = Math.atan2(oy-py, ox-px);
-    lx += Math.cos(theta + deg30) * R;
-    ly += Math.sin(theta + deg30) * R;
-    rx += Math.cos(theta - deg30) * R;
-    ry += Math.sin(theta - deg30) * R;
-    mx += Math.cos(theta) * ml;
-    my += Math.sin(theta) * ml;
+    // to
+    let face2 = (Math.round(2*(phi2 - alpha) / Math.PI) + 4) % 4;
+    switch (face2) {
+      case 0:
+        vt = new Vec2D(p.x + p.w/2, p.y); break;
+      case 3:
+        vt = new Vec2D(p.x, p.y + p.h/2); break;
+      case 2:
+        vt = new Vec2D(p.x - p.w/2, p.y); break;
+      case 1:
+        vt = new Vec2D(p.x, p.y - p.h/2); break;
+    }
 
-    // return `
-    // M${ox},${oy}
-    // L${mx},${my}
-    // L${lx},${ly}
-    // L${px},${py}
-    // L${rx},${ry}
-    // L${mx},${my}
-    // `.replace(/\s+/g, ' ');
+    // ---- end selection
 
-    return `
-    M${mx},${my}
-    L${lx},${ly}
-    L${px},${py}
-    L${rx},${ry}
-    L${mx},${my}
-    `.replace(/\s+/g, ' ');
+    let o = {
+      o: vf,
+      p: vt,
+      l: vt.clone(), // left point of triangle
+      r: vt.clone(), // right point of triangle
+      m: vt.clone(), // mid-point of triangle
+    };
+
+    let theta = o.o.sub(o.p).atan2();
+
+    o.l = o.l.add( Vec2D.rotate(R,  theta + deg30) );
+    o.r = o.r.add( Vec2D.rotate(R,  theta - deg30) );
+    o.m = o.m.add( Vec2D.rotate(ml, theta) );
+
+    return o;
   }
-
+}
+class Vec2D
+{
+  constructor(x, y) {
+    this.x = x||0;
+    this.y = y||0;
+  }
+  static rotate(length, theta) {
+    return new Vec2D(
+      Math.cos(theta) * length,
+      Math.sin(theta) * length
+    );
+  }
+  clone(v) {
+    return new Vec2D(this.x, this.y);
+  }
+  neg() {
+    return new Vec2D(-this.x, -this.y);
+  }
+  add(v, y) {
+    let p = this.clone();
+    if (v instanceof Vec2D) {
+      p.x += v.x;
+      p.y += v.y;
+    } else if (v instanceof Number) {
+      p.x += v;
+      p.y += y||0;
+    }
+    return p;
+  }
+  sub(v, y) {
+    if (v instanceof Vec2D) {
+      return this.add(v.neg());
+    } else if (v instanceof Number) {
+      return this.add(-v, -y);
+    }
+    return this.clone();
+  }
+  atan2() {
+    return Math.atan2(this.y, this.x);
+  }
+  toString() {
+    return `${this.x},${this.y}`;
+  }
+  
 }
 
 class UML_Object

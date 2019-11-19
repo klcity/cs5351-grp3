@@ -26,6 +26,15 @@ class App
       mouseDown: this.mouseDown,
     };
 
+    this.data.codestr = `
+    interface IA
+    interface IB
+    interface IC >> IA
+    
+    class A
+    class B >> A || IC
+    class C >> A || IA`.replace(/  +/gu, ' ');
+
     // note that Vue cannot get in-class methods as created/updated trigger
     this.created = function() {
       this.resetViewbox();
@@ -72,9 +81,8 @@ class App
       // tell them what is wrong in their syntax
       console.log('ERROR', ex);
     } finally {
-      this.$data.errMsg = parser.getErrorMsg();
+      (this.$data||this.data).errMsg = parser.getErrorMsg();
     }
-
 
   } // end input()
 
@@ -147,6 +155,12 @@ class App
 
 let app = new App();
 let vue = new Vue(app);
+
+$(document).ready(() => {
+  setTimeout(() => {
+    $('textarea').trigger('change');
+  }, 1000);
+});
 
 // UI View functions
 function svgMove(dx, dy) {
