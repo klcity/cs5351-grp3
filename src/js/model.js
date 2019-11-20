@@ -48,10 +48,11 @@ class GObj
   init(base)
   {
     // Set box height
-    this.h =      10 *(this.name.length + (this.name.length - 1))
-           + 20 + 10 * (this.attrs.length + (this.attrs.length - 1))
-           + 20 + 10 * (this.methods.length + (this.methods.length - 1))
-           + 20;
+    // this.h =      10 * (this.name.length + (this.name.length - 1))
+    //        + 20 + 10 * (this.attrs.length + (this.attrs.length - 1))
+    //        + 20 + 10 * (this.methods.length + (this.methods.length - 1))
+    //        + 20;
+    this.h = 30 + 20 * (this.name.length + this.attrs.length + this.methods.length);
 
     // Set box width
     let canvas = document.createElement('canvas');
@@ -123,34 +124,41 @@ class GObj
     let vf, vt;
 
     // direction of the 2 boxes
-    let alpha = Math.atan2(this.y - p.y, this.x - p.x);
-    let phi1  = Math.tan(this.w / this.h);
-    let phi2  = Math.tan(p.w / p.h);
+    let alpha = Math.atan2(
+      (this.y - p.y) / this.h,
+      (this.x - p.x) / this.w
+    );
+    let beta = Math.atan2(
+      (p.y - this.y) / p.h,
+      (p.x - this.x) / p.w
+    );
+
+
     // ---- select point, by face
     // from
-    let face1 = (Math.round(2*(alpha - phi1) / Math.PI) + 4) % 4;
+    let face1 = Math.round(2*alpha / Math.PI + 4) % 4;
     switch (face1) {
-      case 2:
-        vf = new Vec2D(this.x + this.w/2, this.y); break;
-      case 3:
-        vf = new Vec2D(this.x, this.y + this.h/2); break;
       case 0:
         vf = new Vec2D(this.x - this.w/2, this.y); break;
       case 1:
         vf = new Vec2D(this.x, this.y - this.h/2); break;
+      case 2:
+        vf = new Vec2D(this.x + this.w/2, this.y); break;
+      case 3:
+        vf = new Vec2D(this.x, this.y + this.h/2); break;
     }
 
     // to
-    let face2 = (Math.round(2*(phi2 - alpha) / Math.PI) + 4) % 4;
+    let face2 = Math.round(2*beta / Math.PI + 4) % 4;
     switch (face2) {
       case 0:
-        vt = new Vec2D(p.x + p.w/2, p.y); break;
-      case 3:
-        vt = new Vec2D(p.x, p.y + p.h/2); break;
-      case 2:
         vt = new Vec2D(p.x - p.w/2, p.y); break;
       case 1:
         vt = new Vec2D(p.x, p.y - p.h/2); break;
+      case 2:
+        vt = new Vec2D(p.x + p.w/2, p.y); break;
+      case 3:
+        vt = new Vec2D(p.x, p.y + p.h/2); break;
     }
 
     // ---- end selection
