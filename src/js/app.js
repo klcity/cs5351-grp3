@@ -47,6 +47,7 @@ class App
   resetViewbox() {
     let root = document.querySelector(this.$options.el);
     let svg = root.querySelector('svg');
+    if (!svg) return;
     let sr = svg.getBBox();
 
     svg.viewBox.baseVal.x      = sr.x - sr.width /2;

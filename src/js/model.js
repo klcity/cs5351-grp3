@@ -193,7 +193,7 @@ class Vec2D
       Math.sin(theta) * length
     );
   }
-  clone(v) {
+  clone() {
     return new Vec2D(this.x, this.y);
   }
   neg() {
