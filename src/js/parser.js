@@ -195,11 +195,11 @@ class UML_ObjectParser
 		let strs = this.getMethodOrAttr(str);
 		let res = true;
 		
-		res = this.checkAttrNameTypeCorrect(strs[0].trim());
+		res = this.checkAttrNameCorrect(strs[0].trim());
 		
 		if (res) {
 			if (strs.length == 2)
-				res = this.checkAttrNameTypeCorrect(strs[1].trim());
+				res = this.checkAttrTypeCorrect(strs[1].trim());
 			else 
 				res = false;
 		}
@@ -208,7 +208,7 @@ class UML_ObjectParser
 	
 	}
 
-	checkAttrNameTypeCorrect(str) {
+	checkAttrNameCorrect(str) {
 
 		let namerx = /[^A-Za-z0-9_$]/;
 		let oname;
@@ -219,6 +219,48 @@ class UML_ObjectParser
 			oname = s.match(namerx);
 		}
 		return !oname;
+		
+  }
+
+	checkAttrTypeCorrect(str) {
+
+		let bname = true;
+		let namerx = /[^A-Za-z0-9_$\[\]\<\>]/;
+		let oname;
+		let oname1;
+		let oname2;
+		let sname;
+		
+		let s = str.trim();
+		
+		if (s.length > 0){
+			oname = s.match(namerx);
+		}
+
+		if (oname){
+			bname = false;
+		}
+
+		if (bname){ // check []
+			let namerx1 = /\[(?!\]$)/;
+			let namerx2 = /(?<!\[)\]/;
+			
+			oname1 = s.match(namerx1);
+			oname2 = s.match(namerx2);
+			
+			if (oname1 || oname2)
+				bname = false;
+		}
+
+		if (bname){ // check <.>
+			if (s.includes('<') || s.includes('>')){
+				sname = this.getGenericType(s);
+				if (!sname)
+					bname = false;
+			}
+		}		
+
+		return bname;
 		
   }
 
@@ -297,6 +339,25 @@ class UML_ObjectParser
 	}
 	
 	return bmethod;
+  }
+  
+  getGenericType(str){
+	 
+	let sgen;
+	
+	let genericrx = /\<[^>]+\>/;
+	let ogeneric;
+	
+	if (str.length > 0){
+		ogeneric = str.trim().match(genericrx);
+		
+		if (ogeneric){
+			sgen = ogeneric[0];
+		}
+	}
+	
+	return sgen;	 	  
+	  
   }
 
   getMethodParam(str) {
@@ -422,7 +483,7 @@ class UML_ClassParser extends UML_ObjectParser
 					break;
 			}else{
 
-				if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
+				if (line.toLowerCase().startsWith("class ") || line.toLowerCase().startsWith("interface ")) {
 					reader.back();
 					break; 
 				}
@@ -585,13 +646,13 @@ class UML_ClassParser extends UML_ObjectParser
 				for (i=0; i<arrParam.length; i++){
 					param = arrParam[i].trim().split(' ');
 					if (matched){
-						matched = this.checkAttrNameTypeCorrect(param[0].trim());
+						matched = this.checkAttrTypeCorrect(param[0].trim());
 						if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
 						
 						if (matched && param.length == 2){
-							matched = this.checkAttrNameTypeCorrect(param[1].trim());
+							matched = this.checkAttrNameCorrect(param[1].trim());
 							if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
-						}else if (param.length > 2){
+						}else if (param.length != 2){
 							matched = false;
 							if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
 						}
@@ -600,14 +661,16 @@ class UML_ClassParser extends UML_ObjectParser
 					}
 				}
 				
-				// return type
-				arrParam = this.getMethodOrAttr(str);
-				matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
-				if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+				if (matched){
+					// return type
+					arrParam = this.getMethodOrAttr(str);
+					matched = this.checkAttrTypeCorrect(arrParam[1].trim());
+					if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+				}
 
 			}else{
 				matched = this.checkAttrLineCorrect(str);
-				if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+				if (!matched) this.err.push("(" + str + ") Invalid attribute definition! The name and type must not contain special characters except _ and $.");
 			}
 		}
 		
@@ -673,7 +736,7 @@ class UML_InterfaceParser extends UML_ObjectParser
 					break;
 			}else{
 
-				if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
+				if (line.toLowerCase().startsWith("class ") || line.toLowerCase().startsWith("interface ")) {
 					reader.back();
 					break; 
 				}
@@ -759,22 +822,24 @@ class UML_InterfaceParser extends UML_ObjectParser
 				for (i=0; i<arrParam.length; i++){
 					param = arrParam[i].trim().split(' ');
 					if (matched){
-						matched = this.checkAttrNameTypeCorrect(param[0].trim());
+						matched = this.checkAttrTypeCorrect(param[0].trim());
 						if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
 						
 						if (matched && param.length == 2){
-							matched = this.checkAttrNameTypeCorrect(param[1].trim());
+							matched = this.checkAttrNameCorrect(param[1].trim());
 							if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
-						}else if (param.length > 2){
+						}else if (param.length != 2){
 							matched = false;
 							if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
 						}
 					}
 				}
-				// return type
-				arrParam = this.getMethodOrAttr(str);
-				matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
-				if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+				if (matched){	
+					// return type
+					arrParam = this.getMethodOrAttr(str);
+					matched = this.checkAttrTypeCorrect(arrParam[1].trim());
+					if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+				}
 
 			}else{
 				matched = false;

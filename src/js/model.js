@@ -238,19 +238,19 @@ class UML_Object
     this.parent  = null;
   }
   addAttribute(attr) {
-    if (this.attrs[attr.name]) {
+    if (this.attrs["$" + attr.name]) {
       // TODO: change all error messages into standardised object,
       //       which provides information for the text parser, and display
       //       error messages to the users.
       throw 'Attribute name already declared';
     }
-    this.attrs[attr.name] = attr;
+    this.attrs["$" + attr.name] = attr;
   }
   addMethod(method) {
-    if (this.methods[method.name]) {
+    if (this.methods["$" + method.name]) {
       throw 'Method already declared';
     }
-    this.methods[method.name] = method;
+    this.methods["$" + method.name] = method;
   }
   connect(obj, action_name) {
     this.assocs[obj.name] = action_name;
