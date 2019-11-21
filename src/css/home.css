@@ -81,6 +81,7 @@ textarea {
   background-color: white;
   border: 1px solid #1abc9c;
   border-radius: 3px;
+  white-space: nowrap;
   outline: none;
   resize: none;
 }
@@ -124,12 +125,24 @@ svg {
   cursor: default;
   user-select: none;
 }
+svg text {
+  font: 12px sans-serif;
+}
 .cls-box {
   fill: none;
 }
-.assc {
-  stroke: red;
+.assc.inhr {
+  fill: white;
+  stroke: black;
   stroke-width: 1;
+}
+.assc.impl .arrow {
+  fill: white;
+  stroke: black;
+}
+.assc.impl .tail {
+  stroke: black;
+  stroke-dasharray: 3 3;
 }
 
 /* Footer Section Layout*/

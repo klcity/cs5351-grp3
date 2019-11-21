@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+canvas {
+  width: 800px;
+  height: 800px;
+  border: 1px solid green;
+}
+</style>
+
+<script src="../js/model.js"></script>
+
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+let c = document.getElementById('c');
+c.width  = 1000;
+c.height = 1000;
+let x = c.getContext('2d');
+
+window.p = new GObj();
+p.w = 100; p.h = 100;
+
+window.q = new GObj();
+q.w = 100; q.h = 100;
+q.x = 200;
+
+
+window.theta = 0;
+
+function draw()
+{
+  const cos = Math.cos;
+  const sin = Math.sin;
+  const atan2 = Math.atan2;
+
+  requestAnimationFrame(draw);
+  q.x = cos(theta) * 200;
+  q.y = sin(theta) * 200;
+
+  // reflesh
+  x.clearRect(0,0,c.width,c.height);
+  x.save();
+  x.translate(500, 500);
+
+  // draw base
+  x.strokeRect(p.x-p.w/2, p.y-p.h/2, p.w, p.h);
+  x.strokeRect(q.x-q.w/2, q.y-q.h/2, q.w, q.h);
+
+  x.beginPath();
+  x.strokeStyle = 'red';
+  x.moveTo(p.x, p.y);
+  x.lineTo(q.x, q.y);
+  x.stroke();
+
+  // test algorithm
+  let S = p.getArrowPoints(q);
+  x.beginPath();
+  x.strokeStyle = 'blue';
+  x.moveTo(S.o.x, S.o.y);
+  x.lineTo(S.p.x, S.p.y);
+  x.stroke();
+
+  // END
+  x.restore();
+
+}
+
+
+draw();
+
+setInterval(() => {
+  const PI2   = Math.PI * 2;
+  const deg09 = 0.9*Math.PI / 180;
+  theta += deg09;
+  if (theta > PI2) theta -= PI2;
+}, 50);
+
+;</script>
+</body>
+</html>

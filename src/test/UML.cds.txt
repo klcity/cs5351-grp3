@@ -1,0 +1,120 @@
+class GObj
+ + x:int
+ + y:int
+ + w:int
+ + h:int
+ + base:UML_Object
+ + attrs:Array
+ + methods:Array
+
+ + GObj(UML_Object base):void
+ + init(UML_Object base):void
+
+ + X():int
+ + Y():int
+
+ + Interfaces():Array
+ + IsInterface():bool
+ + name():string
+ + parent():UML_Object
+ + interfaces():Array
+
+ + ClassNameSeparatorY():int
+ + AttributesSeparatorY():int
+
+ + ParentDrawPath():string
+ + InterfaceDrawPathTail(UML_Interface_ i):string
+ + InterfaceDrawPathArrow(UML_Interface_ i):string
+ + getArrowPoints(GObj p):object
+
+class Vec2D
+ + Vec2D(int x, int y):void
+ + rotate(int length, double theta):Vec2D
+ + clone():Vec2D
+ + neg():Vec2D
+ + addV(Vec2D v):Vec2D
+ + addN(int x, int y):Vec2D
+ + subV(Vec2D v):Vec2D
+ + subN(int x, int y):Vec2D
+ + atan2():double
+ + toString_():string
+
+class UML_Object
+ + UML_Object():void
+
+ + name:string
+ + attrs:HashTable
+ + methods:HashTable
+ + assocs:HashTable
+ + parent:UML_Object
+
+ + addAttribute(UML_Attribute attr):void
+ + addMethod(UML_Method method):void
+
+ + connect(UML_Object obj, string action_name):void
+ + extends(UML_Object obj):void
+
+class UML_Class >> UML_Object
+ + UML_Class():void 
+ + implements(UML_Interface_ interface):void
+
+class UML_Interface >> UML_Object
+ + UML_Interface():void
+
+class UML_Attribute
+ + modifier:string
+ + name:string
+ + type:string
+ + toString_():string
+
+class UML_Method
+ + modifier:string
+ + name:string
+ + parameters:Array
+ + type:string
+ + addParam(string type, string name):void
+ + toString_():string
+
+class LineReader
+ + LineReader(string text):void
+ + read():string
+ + back():void
+
+class Parser
+ + Parser():void
+ + Parsers:HashTable
+ + arr:Array
+ + out_err:Array
+
+ + parse(string raw_syntax):Array
+ + getErrorMsg():Array
+
+class UML_ObjectParser
+ + UML_ObjectParser():void
+ + addMessage(string str):void
+ + getMessage():Array
+ + createUMLMethod(string vis, Array strArr):UML_Method
+ + createUMLAttribute(string vis, Array strArr):UML_Attribute
+ + lookUpObjectByName(string str, Array arr):object
+ + splitAssociationString(string str):int
+ + getVisibility(string str):str
+ + getMethodOrAttr(string str):string
+ + checkColonCorrect(string str):bool
+ + checkAttrLineCorrect(string str):bool
+ + checkAttrNameTypeCorrect(string str):bool
+ + checkMethodNameCorrect(string str):bool
+ + isMethod(string str):bool
+ + getMethodParam(string str):Array
+ + checkOnlyOneExtend(string str):bool
+
+class UML_ClassParser >> UML_ObjectParser
+ + read(LineReader reader, Array arr):UML_Class
+ + degineAssociationObj(string str):Array
+ + validateAssociationLine(string str):bool
+ + checkMultipleImplement(string str):bool
+ + validateLine(string str):bool
+
+class UML_InterfaceParser >> UML_ObjectParser
+ + read(LineReader reader, Array arr):UML_Interface
+ + validateAssociationLine(string str):bool
+ + validateLine(string str):bool

@@ -109,7 +109,7 @@ class UML_ObjectParser
     return this.err;
   }
   
-  createUMLMethod(vis, strArr){
+  createUMLMethod(vis, strArr) {
 
     let param;
     let i;
@@ -126,7 +126,7 @@ class UML_ObjectParser
 
   }
 
-  createUMLAttribute(vis, strArr){
+  createUMLAttribute(vis, strArr) {
 
     let objAttribute = new UML_Attribute(vis, strArr[0].trim(), strArr[1].trim());
 
@@ -134,124 +134,112 @@ class UML_ObjectParser
 
   }
 
-  lookUpObjectByName(str, arr){
+  lookUpObjectByName(str, arr) {
 
     let i;
     for (i=0; i<arr.length; i++){
-        if (arr[i].name == str){
-            return arr[i];
-        }
+			if (arr[i].name == str){
+					return arr[i];
+			}
     }
     return null;
   }
 
-  splitAssociationString(str){
+  splitAssociationString(str) {
 
-	let regex = /\>[^>]{0}\>|\|[^|]{0}\|/;
-	let asso = null;	
-	let idx = -1;
-	let found = str.match(regex);
-	
-	if (found){
-		asso = found[0].trim();
-		idx = str.indexOf(asso);
-	}
+		let regex = /\>[^>]{0}\>|\|[^|]{0}\|/;
+		let asso = null;	
+		let idx = -1;
+		let found = str.match(regex);
+		
+		if (found){
+			asso = found[0].trim();
+			idx = str.indexOf(asso);
+		}
 
-	return idx;
-	
+		return idx;
+		
   }
 
-  getVisibility(str){
+  getVisibility(str) {
 	
-	let visrx = /[\+\-\~\#]/;
-	let ovis;
-	
-	if (str.length > 0){
-		ovis = str.trim().match(visrx);
-		if (ovis){
-			return ovis;
+		let visrx = /[\+\-\~\#]/;
+		
+		if (str.length > 0){
+			let ovis = str.trim().match(visrx);
+			return ovis || "";
 		}
 		return "";
-	}else{
-		return "";
-	}
   }
 
-  getMethodOrAttr(str){
+  getMethodOrAttr(str) {
 	
-	// attribute / method name and type (separated by ':') 
-	let attr_method_name = str.substring(1,str.length).trim();
-	
-	let strs;
-	if (attr_method_name.length > 0){
-		strs = attr_method_name.split(':');
-	}
-	
-	return strs;
+		// attribute / method name and type (separated by ':') 
+		let attr_method_name = str.substring(1,str.length).trim();
+		
+		let strs;
+		if (attr_method_name.length > 0){
+			strs = attr_method_name.split(':');
+		}
+		
+		return strs;
   }
   
-   checkColonCorrect(str){
-	
-	let strs = this.getMethodOrAttr(str);
-	
-	return (strs.length == 2);
+	checkColonCorrect(str) {
+		let strs = this.getMethodOrAttr(str);
+		return (strs.length == 2);
   }  
   
-   checkAttrLineCorrect(str){
+	checkAttrLineCorrect(str) {
 	
-	let strs = this.getMethodOrAttr(str);
-	let res = true;
-	
-	res = this.checkAttrNameTypeCorrect(strs[0].trim());
-	
-	if (res){
-		if (strs.length == 2)
-			res = this.checkAttrNameTypeCorrect(strs[1].trim());
-		else 
-			res = false;
-	}
-	
-	return res;
-	
-   }
-
-   checkAttrNameTypeCorrect(str){
-	
-	let bname = true;
-	
-	let namerx = /[^A-Za-z0-9_$]/;
-	let oname;
-	
-	let s = str.trim();
-	
-	if (s.length > 0){
-		oname = s.match(namerx);
-		if (oname){
-			bname = false;
+		let strs = this.getMethodOrAttr(str);
+		let res = true;
+		
+		res = this.checkAttrNameTypeCorrect(strs[0].trim());
+		
+		if (res) {
+			if (strs.length == 2)
+				res = this.checkAttrNameTypeCorrect(strs[1].trim());
+			else 
+				res = false;
 		}
-	}
-	return bname;
+		
+		return res;
 	
-   }
+	}
 
-   checkMethodNameCorrect(str){
-	
-	let bname = true;
-	let strs = this.getMethodOrAttr(str);
-	let s0 = strs[0].trim();
-	let namerx = /[^A-Za-z0-9_$]/;
-	let oname;
-	
-	let s = s0.substr(0,s0.indexOf('('));
-	
-	if (s.length > 0){
-		oname = s.trim().match(namerx);
-		if (oname){
-			bname = false;
+	checkAttrNameTypeCorrect(str) {
+
+		let namerx = /[^A-Za-z0-9_$]/;
+		let oname;
+		
+		let s = str.trim();
+		
+		if (s.length > 0){
+			oname = s.match(namerx);
 		}
-	}
-	return bname;
-	
+		return !oname;
+		
+  }
+
+  checkMethodNameCorrect(str) {
+		
+		let bname = true;
+		let strs = this.getMethodOrAttr(str);
+		let s0 = strs[0].trim();
+		let namerx = /[^A-Za-z0-9_$]/;
+		let oname;
+		
+		let s = s0.substr(0,s0.indexOf('('));
+		
+		if (s.length > 0){
+			oname = s.trim().match(namerx);
+			if (oname){
+				bname = false;
+			}
+		}
+		return bname;
+		
   }    
 
    checkObjectNameCorrect(str){
@@ -311,45 +299,47 @@ class UML_ObjectParser
 	return bmethod;
   }
 
-  getMethodParam(str){
+  getMethodParam(str) {
 	
-	let strParam;
-	let params;
-	let methodrx = /\([^)]*\)/;
-	let omethod;
-	
-	if (str.length > 0){
-		omethod = str.trim().match(methodrx);
-	}
-	if (omethod){
-		strParam = omethod[0].substring(1,omethod[0].length-1);
-	}
-	if (strParam.trim().length > 0)
-		params = strParam.trim().split(',');
-	else
-		params = [];
-	
-	return params;
+		let strParam;
+		let params;
+		let methodrx = /\([^)]*\)/;
+		let omethod;
+		
+		if (str.length > 0){
+			omethod = str.trim().match(methodrx);
+		}
+		if (omethod){
+			strParam = omethod[0].substring(1,omethod[0].length-1);
+		}
+		if (strParam.trim().length > 0)
+			params = strParam.trim().split(',');
+		else
+			params = [];
+		
+		return params;
   }  
   
-  checkOnlyOneExtend(str){
-	str = str.trim();
-    var regex_1 = str.match(/[>]{2}/g); // define only can have one >> characters under string
-    var regex_2 = str.match(/[>]/g);	
+  checkOnlyOneExtend(str) {
 
-	var res = true;
-	
-	if(str[0].match(">") || str[str.length-1].match(">"))
-		res = false;
-	else if (regex_1 || regex_2)
-	{
-		if (regex_2.length != 2)
-			res = false;
-		else if (regex_1.length != 1)
-			res = false;
+		/*
+		let regExp = /^(abstract\s+)?class\s+([^>]*)(>>)([^>|]*)(\|\|\s*(([^>|,]+,?)*))?$/gi
+		*/
+
+		str = str.trim();
+		let regex_1 = str.match(/[>]{2}/g); // define only can have one >> characters under string
+		let regex_2 = str.match(/[>]/g);	
+
+		if (str[0].match(">") || str[str.length-1].match(">"))
+			return false;
+
+		if (regex_2 && regex_2.length != 2)
+			return false;
+		if (regex_1 && regex_1.length != 1)
+			return false;
+		
+		return true;    
 	}
-    return res;    
-  }
 
 }
 
@@ -361,16 +351,16 @@ class UML_ClassParser extends UML_ObjectParser
     // console.log( "UML_ClassParser.read()");
 
     // read and create Class Object
-	let obj = new UML_Class();
-	reader.back();
-	
-	let headerline = true;
-	
-    let line;
-	let classDef;
-	let assoDef;
-	let i;
-    while (line = reader.read()){
+		let obj = new UML_Class();
+		reader.back();
+		
+		let headerline = true;
+		
+		let line;
+		let classDef;
+		let assoDef;
+		let i;
+		while (line = reader.read()) {
 
 		if (headerline){ 
 			if (this.validateAssociationLine(line)){
@@ -394,74 +384,74 @@ class UML_ClassParser extends UML_ObjectParser
 					else break;
 				}
 
-				if (assoDef.length > 0){
-					
-					let assoname;	
-					let assobj;
-					let superclass;
-					
-					let assoArr = this.defineAssociationObj(assoDef);
-					//console.log(assoArr.length);	
-					
+					if (assoDef.length > 0){
+						
+						let assoname;	
+						let assobj;
+						let superclass;
+						
+						let assoArr = this.defineAssociationObj(assoDef);
+						//console.log(assoArr.length);	
+						
 
-					if (assoArr.length > 0){ // has interface but no super class
-						superclass = assoArr[0].substring(2,assoArr[0].length).trim();
-						if (superclass.length > 0){
-							assobj = this.lookUpObjectByName(superclass, arr);
-							if (assobj)
-							{
-								obj.extends(assobj);
-							}else{
-								this.err.push("(" + line + ") Invalid superclass! SuperClass not found.");
+						if (assoArr.length > 0){ // has interface but no super class
+							superclass = assoArr[0].substring(2,assoArr[0].length).trim();
+							if (superclass.length > 0){
+								assobj = this.lookUpObjectByName(superclass, arr);
+								if (assobj)
+								{
+									obj.extends(assobj);
+								}else{
+									this.err.push("(" + line + ") Invalid superclass! SuperClass not found.");
+								}
 							}
 						}
+						
+						for (i=1; i < assoArr.length; i++){		// Interface				
+							assoname = assoArr[i].trim();	
+							assobj = this.lookUpObjectByName(assoname, arr);
+							if (assobj)
+							{
+								obj.implements(assobj);
+							}else{
+								this.err.push("(" + line + ") Invalid association! Interface not found.");
+							}							
+						}
+					}
+				}else
+					break;
+			}else{
+
+				if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
+					reader.back();
+					break; 
+				}
+					
+				// parse line
+				if (this.validateLine(line)){
+
+					let attr_method = this.getMethodOrAttr(line);
+					
+					let bmethod = this.isMethod(attr_method[0]);
+					
+					let vis = this.getVisibility(line);
+					
+					if (bmethod){
+						obj.addMethod(this.createUMLMethod(vis[0], attr_method));
+					}else{
+						obj.addAttribute(this.createUMLAttribute(vis[0], attr_method));
 					}
 					
-					for (i=1; i < assoArr.length; i++){		// Interface				
-						assoname = assoArr[i].trim();	
-						assobj = this.lookUpObjectByName(assoname, arr);
-						if (assobj)
-						{
-							obj.implements(assobj);
-						}else{
-							this.err.push("(" + line + ") Invalid association! Interface not found.");
-						}							
-					}
-				}
-			}else
-				break;
-		}else{
-
-			if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
-				reader.back();
-				break; 
-			}
-				
-			// parse line
-			if (this.validateLine(line)){
-
-				let attr_method = this.getMethodOrAttr(line);
-				
-				let bmethod = this.isMethod(attr_method[0]);
-				
-				let vis = this.getVisibility(line);
-				
-				if (bmethod){
-					obj.addMethod(this.createUMLMethod(vis[0], attr_method));
 				}else{
-					obj.addAttribute(this.createUMLAttribute(vis[0], attr_method));
-				}
-				
-			}else{
-				// Error Handling
-				// TODO:
+					// Error Handling
+					// TODO:
 
-			}			
+				}			
+			}
 		}
-	}
-	//console.log(obj);
-	return obj;
-	
+		//console.log(obj);
+		return obj;
+		
     //throw `Error found on line ${lineNumber}`;
 
   }
@@ -520,109 +510,108 @@ class UML_ClassParser extends UML_ObjectParser
 	return res;
  }  
 
- checkMultipleImplement(str){
-	str = str.trim();
-    var regex_1 = str.match(/[|]{2}/g); // define only can have one >> characters under string
-    var regex_2 = str.match(/[|]/g);	
-	var a = str.split('||');
+ 	checkMultipleImplement(str){
+		str = str.trim();
+			var regex_1 = str.match(/[|]{2}/g); // define only can have one >> characters under string
+			var regex_2 = str.match(/[|]/g);	
+		var a = str.split('||');
 
-	var res = true;
-	
-	if (regex_1 || regex_2)
-	{
-		if (regex_2.length%2 != 0)
-			res = false;
-		else {
-			var n = regex_1.length;
-			var i;
-			if (n == a.length-1){
-				for (i=1; i<a.length; i++){
-					if (a[i].trim().length == 0)
-						res = false;
-				}					
-			}else{
+		var res = true;
+		
+		if (regex_1 || regex_2)
+		{
+			if (regex_2.length%2 != 0)
 				res = false;
+			else {
+				var n = regex_1.length;
+				var i;
+				if (n == a.length-1){
+					for (i=1; i<a.length; i++){
+						if (a[i].trim().length == 0)
+							res = false;
+					}					
+				}else{
+					res = false;
+				}
 			}
 		}
-	}
     return res;    
   } 
 
   validateLine(str){
-	// Pending implementation
-	// TODO:
-	/*
-		(1) modifier must be + - # ~
-		(2) name must not contain special characters except _ and $
-	*/
-	// (1) modifier only appear in the first character	
-	let visrx = /^[\+\-\~\#]/;
-	let ovis;
-	let matched = true;
+		// Pending implementation
+		// TODO:
+		/*
+			(1) modifier must be + - # ~
+			(2) name must not contain special characters except _ and $
+		*/
+		// (1) modifier only appear in the first character	
+		let visrx = /^[\+\-\~\#]/;
+		let ovis;
+		let matched = true;
 	
-	if (str.length > 0){
-		ovis = str.trim().match(visrx);
-		if (ovis == null){
-			matched = false;
-			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
-		}
-		else{
-		  ovis = str.substr(1,str.len).match(visrx);
-		  if (ovis){
-			matched = false;
-			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
-		  }
-		}		
-	}
-	
-	// (2) check ':' exists
-	if (matched){
-		matched = this.checkColonCorrect(str);
-		if (!matched) this.err.push("(" + str + ") Invalid number of separator ':'");
-	}
-	// (3) name must not contain special characters except _ and $
-	if (matched){
-		if (this.isMethod(str)){
-			matched = this.checkMethodNameCorrect(str);
-			if (!matched) this.err.push("(" + str + ") Invalid method name! Name must not contain special characters except _ and $.");
-
-			// check attr names must not contain special characters except _ and $
-			let param;
-			let i;
-			let arrParam = this.getMethodParam(str);
-			let arrMethod;
-
-			for (i=0; i<arrParam.length; i++){
-				param = arrParam[i].trim().split(' ');
-				if (matched){
-					matched = this.checkAttrNameTypeCorrect(param[0].trim());
-					if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
-					
-					if (matched && param.length == 2){
-						matched = this.checkAttrNameTypeCorrect(param[1].trim());
-						if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
-					}else if (param.length > 2){
-						matched = false;
-						if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
-					}
-					
-
-				}
+		if (str.length > 0){
+			ovis = str.trim().match(visrx);
+			if (ovis == null){
+				matched = false;
+				if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
 			}
-			
-			// return type
-			arrParam = this.getMethodOrAttr(str);
-			matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
-			if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
-
-		}else{
-			matched = this.checkAttrLineCorrect(str);
-			if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+			else{
+				ovis = str.substr(1,str.len).match(visrx);
+				if (ovis){
+				matched = false;
+				if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
+				}
+			}		
 		}
-	}
-	
-	return matched;
-	//return true;
+		
+		// (2) check ':' exists
+		if (matched){
+			matched = this.checkColonCorrect(str);
+			if (!matched) this.err.push("(" + str + ") Invalid number of separator ':'");
+		}
+		// (3) name must not contain special characters except _ and $
+		if (matched){
+			if (this.isMethod(str)){
+				matched = this.checkMethodNameCorrect(str);
+				if (!matched) this.err.push("(" + str + ") Invalid method name! Name must not contain special characters except _ and $.");
+
+				// check attr names must not contain special characters except _ and $
+				let param;
+				let i;
+				let arrParam = this.getMethodParam(str);
+				let arrMethod;
+
+				for (i=0; i<arrParam.length; i++){
+					param = arrParam[i].trim().split(' ');
+					if (matched){
+						matched = this.checkAttrNameTypeCorrect(param[0].trim());
+						if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
+						
+						if (matched && param.length == 2){
+							matched = this.checkAttrNameTypeCorrect(param[1].trim());
+							if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+						}else if (param.length > 2){
+							matched = false;
+							if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
+						}
+						
+
+					}
+				}
+				
+				// return type
+				arrParam = this.getMethodOrAttr(str);
+				matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
+				if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+
+			}else{
+				matched = this.checkAttrLineCorrect(str);
+				if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+			}
+		}
+		
+		return matched;
   }
 
 }
@@ -634,14 +623,14 @@ class UML_InterfaceParser extends UML_ObjectParser
   {
     // console.log( "UML_InterfaceParser.read()");
     // read and create Class Object
-	let obj = new UML_Interface();
-	reader.back();
-	
-	let headerline = true;
-	
-    let line;
-   let classDef;
-   let assoDef;
+		let obj = new UML_Interface();
+		reader.back();
+		
+		let headerline = true;
+		
+		let line;
+		let classDef;
+		let assoDef;
 
     while (line = reader.read()){
 		if (headerline){ 
@@ -671,134 +660,128 @@ class UML_InterfaceParser extends UML_ObjectParser
 					let assobj;
 					let superclass;
 
-					superclass = assoDef.substring(2,assoDef.length).trim();
-					assobj = this.lookUpObjectByName(superclass, arr);
-					if (assobj)
-					{
-						obj.extends(assobj);
-					}else{
-						this.err.push("(" + line + ") Invalid Association! Interface not found.");
-					}
-				}			
-			}else
-				break;
-		}else{
-
-			if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
-				reader.back();
-				break; 
-			}
-
-			// parse line
-			if (this.validateLine(line)){
-				
-				let vis = this.getVisibility(line);
-				let attr_method = this.getMethodOrAttr(line);
-
-				obj.addMethod(this.createUMLMethod(this.getVisibility(line), attr_method));
-				
+						superclass = assoDef.substring(2,assoDef.length).trim();
+						assobj = this.lookUpObjectByName(superclass, arr);
+						if (assobj)
+						{
+							obj.extends(assobj);
+						}else{
+							this.err.push("(" + line + ") Invalid Association! Interface not found.");
+						}
+					}			
+				}else
+					break;
 			}else{
-				// Error Handling
-				// TODO:
-			}			
+
+				if (line.toLowerCase().includes("class ") || line.toLowerCase().includes("interface ")) {
+					reader.back();
+					break; 
+				}
+
+				// parse line
+				if (this.validateLine(line)){
+					
+					let vis = this.getVisibility(line);
+					let attr_method = this.getMethodOrAttr(line);
+
+					obj.addMethod(this.createUMLMethod(this.getVisibility(line), attr_method));
+					
+				}else{
+					// Error Handling
+					// TODO:
+				}			
+			}
 		}
-	}
-	console.log(obj);
-	return obj;
+		console.log(obj);
+		return obj;
     
   }
 
   validateAssociationLine(str){
-	  
-	/*
-		(1) can only have one >>
-		(2) must be separated by a name in between
-	*/
-	var res = this.checkOnlyOneExtend(str);
-	if (!res) this.err.push("(" + str + ") Invalid inheritenance! Only one superclass allowed.");
-	
-	return res;
-	 
+			
+		/*
+			(1) can only have one >>
+			(2) must be separated by a name in between
+		*/
+		var res = this.checkOnlyOneExtend(str);
+		if (!res) this.err.push("(" + str + ") Invalid inheritenance! Only one superclass allowed.");
+		
+		return res;
+		
   }
   
   validateLine(str){
-	// Pending implementation
-	// TODO:
-	// only accept methods
-	/*
-		(1) modifier must be + (public)
-		(2) name must not contain special characters except _ and $
-	*/
+		// Pending implementation
+		// TODO:
+		// only accept methods
+		/*
+			(1) modifier must be + (public)
+			(2) name must not contain special characters except _ and $
+		*/
 
-	// (1) modifier only appear in the first character
-	let visrx = /^[\+]/;
-	let ovis;
-	let matched = true;
-	
-	if (str.length > 0){
-		ovis = str.trim().match(visrx);
-		if (ovis == null){
-			matched = false;
-			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
-		}else{
-		  ovis = str.substr(1,str.len).match(visrx);
-		  if (ovis){
-			matched = false;
-			if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
+		// (1) modifier only appear in the first character
+		let visrx = /^[\+]/;
+		let ovis;
+		let matched = true;
+		
+		if (str.length > 0){
+			ovis = str.trim().match(visrx);
+			if (ovis == null){
+				matched = false;
+				if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
+			}else{
+				ovis = str.substr(1,str.len).match(visrx);
+				if (ovis){
+				matched = false;
+				if (!matched) this.err.push("(" + str + ") Invalid modifier! Should be the first character on the line.");
 
-		  }
-		}
-	}	
-	
-	// (2) check ':' exists
-	if (matched){
-		matched = this.checkColonCorrect(str);
-		if (!matched) this.err.push("(" + str + ") Invalid number of separator ':'");
-	}
-	
-	// (3) name must not contain special characters except _ and $
-	if (matched){
-		if (this.isMethod(str)){
-			matched = this.checkMethodNameCorrect(str);
-			if (!matched) this.err.push("(" + str + ") Invalid method name! Name must not contain special characters except _ and $.");
-
-			// check attr names must not contain special characters except _ and $
-			let param;
-			let i;
-			let arrParam = this.getMethodParam(str);
-
-			for (i=0; i<arrParam.length; i++){
-				param = arrParam[i].trim().split(' ');
-				if (matched){
-					matched = this.checkAttrNameTypeCorrect(param[0].trim());
-					if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
-					
-					if (matched && param.length == 2){
-						matched = this.checkAttrNameTypeCorrect(param[1].trim());
-						if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
-					}else if (param.length > 2){
-						matched = false;
-						if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
-					}
 				}
 			}
-			// return type
-			arrParam = this.getMethodOrAttr(str);
-			matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
-			if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
-
-
-
-		}else{
-			matched = false;
-			this.err.push("(" + str + ") This line should be a public method with correct syntax.");
-		}
-	}
+		}	
 		
-	
-	
-	
-   return matched;
-//   return true;
+		// (2) check ':' exists
+		if (matched){
+			matched = this.checkColonCorrect(str);
+			if (!matched) this.err.push("(" + str + ") Invalid number of separator ':'");
+		}
+		
+		// (3) name must not contain special characters except _ and $
+		if (matched){
+			if (this.isMethod(str)){
+				matched = this.checkMethodNameCorrect(str);
+				if (!matched) this.err.push("(" + str + ") Invalid method name! Name must not contain special characters except _ and $.");
+
+				// check attr names must not contain special characters except _ and $
+				let param;
+				let i;
+				let arrParam = this.getMethodParam(str);
+
+				for (i=0; i<arrParam.length; i++){
+					param = arrParam[i].trim().split(' ');
+					if (matched){
+						matched = this.checkAttrNameTypeCorrect(param[0].trim());
+						if (!matched) this.err.push("(" + str + ") Invalid attribute type! Name must not contain special characters except _ and $.");
+						
+						if (matched && param.length == 2){
+							matched = this.checkAttrNameTypeCorrect(param[1].trim());
+							if (!matched) this.err.push("(" + str + ") Invalid attribute name! Name must not contain special characters except _ and $.");
+						}else if (param.length > 2){
+							matched = false;
+							if (!matched) this.err.push("(" + str + ") Invalid attribute definition! Should be type + name only.");
+						}
+					}
+				}
+				// return type
+				arrParam = this.getMethodOrAttr(str);
+				matched = this.checkAttrNameTypeCorrect(arrParam[1].trim());
+				if (!matched) this.err.push("(" + str + ") Invalid return type definition! Type must not contain special characters except _ and $.");
+
+			}else{
+				matched = false;
+				this.err.push("(" + str + ") This line should be a public method with correct syntax.");
+			}
+		}
+
+		return matched;
   }  
 }
