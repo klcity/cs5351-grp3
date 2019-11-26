@@ -17,6 +17,7 @@ class App
       errMsg: '',
       placeholder: placeholder,
       maxViewBox: {},
+      pngImageSize: {},
     };
 
     this.methods = {
@@ -49,6 +50,8 @@ class App
     let svg = root.querySelector('svg');
     if (!svg) return;
     let sr = svg.getBBox();
+    
+    this.pngImageSize = sr;
 
     svg.viewBox.baseVal.x      = sr.x - sr.width /2;
     svg.viewBox.baseVal.y      = sr.y - sr.height/2;
@@ -203,12 +206,17 @@ function imgEmail() {
 // Download PNG function
 function downloadPNG(){
   let svg = document.querySelector('svg');
-  let rect = svg.getBoundingClientRect();
+  svg.viewBox.baseVal.x = vue.pngImageSize.x - 20;
+  svg.viewBox.baseVal.y = vue.pngImageSize.y - 20;
+
   var cvs = document.createElement('canvas');
-  svg.setAttribute('width', rect.width);
-  svg.setAttribute('height', rect.height);
-  cvs.width = rect.width;
-  cvs.height = rect.height;
+
+  svg.viewBox.baseVal.width = vue.pngImageSize.width + 40;
+  svg.viewBox.baseVal.height = vue.pngImageSize.height + 40;
+
+  cvs.width = vue.pngImageSize.width;
+  cvs.height = vue.pngImageSize.height;
+
   let data = new XMLSerializer().serializeToString(svg);
   let win = window.URL || window.webkitURL || window;
   let img = new Image();
