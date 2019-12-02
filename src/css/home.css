@@ -81,7 +81,7 @@ textarea {
   background-color: white;
   border: 1px solid #1abc9c;
   border-radius: 3px;
-  white-space: nowrap;
+  white-space: pre;
   outline: none;
   resize: none;
 }
