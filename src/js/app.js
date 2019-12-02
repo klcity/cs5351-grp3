@@ -74,7 +74,6 @@ class App
     } catch (ex) {
       // TODO:: Show Error Messages to users,
       // tell them what is wrong in their syntax
-      console.log('ERROR', ex);
     } finally {
       (this.$data||this.data).errMsg = parser.getErrorMsg();
     }

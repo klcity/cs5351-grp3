@@ -80,15 +80,9 @@ class Parser
     }
     catch (ex)
     {
-	  // TODO: show exception message thrown by the parsers
-	  console.log(ex);
-      console.log(ex.message);
-	  //throw ex;
+  	  // TODO: show exception message thrown by the parsers
+	    //throw ex;
     }
-    console.log("arr size: " + this.arr.length);
-    console.log(this.arr);
-    console.log("out_err size: " + this.out_err.length);
-    console.log(this.out_err);
 
     return this.arr;
   }
@@ -409,8 +403,6 @@ class UML_ClassParser extends UML_ObjectParser
 {
   read(reader, arr)
   {
-    // console.log( "UML_ClassParser.read()");
-
     // read and create Class Object
 		let obj = new UML_Class();
 		reader.back();
@@ -451,9 +443,7 @@ class UML_ClassParser extends UML_ObjectParser
 						let assobj;
 						let superclass;
 						
-						let assoArr = this.defineAssociationObj(assoDef);
-						//console.log(assoArr.length);	
-						
+						let assoArr = this.defineAssociationObj(assoDef);						
 
 						if (assoArr.length > 0){ // has interface but no super class
 							superclass = assoArr[0].substring(2,assoArr[0].length).trim();
@@ -510,7 +500,6 @@ class UML_ClassParser extends UML_ObjectParser
 				}			
 			}
 		}
-		//console.log(obj);
 		return obj;
 		
     //throw `Error found on line ${lineNumber}`;
@@ -527,9 +516,6 @@ class UML_ClassParser extends UML_ObjectParser
         // 2. the 1st element will be empty (no superclass) or >> XXX (has superclass)
 
         arrImp = str.split("||");
-        //for (i = 0; i<arrImp.length; i++){
-        //   console.log(arrImp[i]);
-        //}
     }
     return arrImp;
 
@@ -684,7 +670,6 @@ class UML_InterfaceParser extends UML_ObjectParser
 {
   read(reader, arr)
   {
-    // console.log( "UML_InterfaceParser.read()");
     // read and create Class Object
 		let obj = new UML_Interface();
 		reader.back();
@@ -755,7 +740,7 @@ class UML_InterfaceParser extends UML_ObjectParser
 				}			
 			}
 		}
-		console.log(obj);
+
 		return obj;
     
   }
