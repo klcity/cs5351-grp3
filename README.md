@@ -1,5 +1,3 @@
-<style> img { vertical-align: middle; } </style>
-
 Usage Guide
 ===========
 
