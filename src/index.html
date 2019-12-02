@@ -79,12 +79,12 @@
                   {{ d }}</text>
               </g>
 
-            <path v-if="r.parent" class="inhr assc"
+            <path v-if="r.parent" class="inhr assc" style="fill:white;stroke-width:2;stroke:black;"
                   :d="r.ParentDrawPath"></path>
 
             <g v-for="i in r.interfaces" class="impl assc">
-              <path class="tail"  :d="r.InterfaceDrawPathTail(i)"></path>
-              <path class="arrow" :d="r.InterfaceDrawPathArrow(i)"></path>
+              <path class="tail"  :d="r.InterfaceDrawPathTail(i)"  style="fill:white;stroke-width:2;stroke:black;stroke-dasharray:4;" ></path>
+              <path class="arrow" :d="r.InterfaceDrawPathArrow(i)" style="fill:white;stroke-width:2;stroke:black;" ></path>
             </g>
           </g>
 
@@ -98,6 +98,7 @@
       <div>
         <span>Image</span>
         <button onclick="imgPrint()">Print</button>
+        <button onclick="imgEmail()">Email</button>
       </div>
       <div>
         <span>Zoom </span>

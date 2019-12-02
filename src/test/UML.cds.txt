@@ -23,8 +23,8 @@ class GObj
  + AttributesSeparatorY():int
 
  + ParentDrawPath():string
- + InterfaceDrawPathTail(UML_Interface_ i):string
- + InterfaceDrawPathArrow(UML_Interface_ i):string
+ + InterfaceDrawPathTail(UML_Interface i):string
+ + InterfaceDrawPathArrow(UML_Interface i):string
  + getArrowPoints(GObj p):object
 
 class Vec2D
@@ -37,7 +37,7 @@ class Vec2D
  + subV(Vec2D v):Vec2D
  + subN(int x, int y):Vec2D
  + atan2():double
- + toString_():string
+ + toString():string
 
 class UML_Object
  + UML_Object():void
@@ -56,7 +56,7 @@ class UML_Object
 
 class UML_Class >> UML_Object
  + UML_Class():void 
- + implements(UML_Interface_ interface):void
+ + implements(UML_Interface interface):void
 
 class UML_Interface >> UML_Object
  + UML_Interface():void
@@ -65,7 +65,7 @@ class UML_Attribute
  + modifier:string
  + name:string
  + type:string
- + toString_():string
+ + toString():string
 
 class UML_Method
  + modifier:string
@@ -73,7 +73,7 @@ class UML_Method
  + parameters:Array
  + type:string
  + addParam(string type, string name):void
- + toString_():string
+ + toString():string
 
 class LineReader
  + LineReader(string text):void

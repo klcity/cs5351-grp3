@@ -1,5 +1,5 @@
 let C = {
-  BOX_PADX: 25,
+  BOX_PADX: 50,
   BOX_PADY: 20,
   PAD: 50,
   ClassNameHeight: 20,
