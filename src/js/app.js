@@ -27,15 +27,6 @@ class App
       mouseDown: this.mouseDown,
     };
 
-    this.data.codestr = `
-    interface IA
-    interface IB
-    interface IC >> IA
-    
-    class A
-    class B >> A || IC
-    class C >> A || IA`.replace(/  +/gu, ' ');
-
     // note that Vue cannot get in-class methods as created/updated trigger
     this.created = function() {
       this.resetViewbox();
