@@ -91,17 +91,17 @@ Draft Custom Syntax Design
 <pre>
 title Graph Title
 
-class A >> Class SU-A || interface IF1 || interface IF2
+class A >> SU-A ||  IF1 ||  IF2
 + attr1 : int
 # attr2 : string
 - attr3 : double
 ~ attr4 : Boolean
 + method1():void
-# method2(a:int, b:byte[]):int
+# method2(int a, byte[] b):int
 
 interface B >> interface C
 + method1():string
-+ method2(str:string...):double
++ method2(str[] s):double
 </pre>
 
 Class A, which extends Class SU-A implements Interface IF1 and IF2, has 4 attributes, which are:
